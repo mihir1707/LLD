@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UML Diagrams — LLD Notes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-primary: #0d0f17;
+      --bg-secondary: #131621;
+      --bg-card: #1a1e2e;
+      --bg-card-hover: #1f2538;
+      --border: #2a2f45;
+      --border-accent: #3a4060;
+      --text-primary: #e8ecf4;
+      --text-secondary: #8b92ad;
+      --text-muted: #555e7a;
+      --accent-blue: #4f8ef7;
+      --accent-purple: #9b6dff;
+      --accent-green: #3ecf8e;
+      --accent-orange: #f7934f;
+      --accent-pink: #f76b8a;
+      --accent-cyan: #4fd9f7;
+      --accent-yellow: #f7d94f;
+      --gradient-blue: linear-gradient(135deg, #4f8ef7, #9b6dff);
+      --gradient-green: linear-gradient(135deg, #3ecf8e, #4fd9f7);
+      --gradient-orange: linear-gradient(135deg, #f7934f, #f76b8a);
+      --shadow-card: 0 4px 24px rgba(0,0,0,0.4);
+      --shadow-glow-blue: 0 0 24px rgba(79,142,247,0.15);
+      --radius: 14px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* ─── HERO HEADER ─── */
+    .hero {
+      background: linear-gradient(135deg, #0d0f17 0%, #131a35 50%, #0d0f17 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 60px 40px 50px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(79,142,247,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(79,142,247,0.1);
+      border: 1px solid rgba(79,142,247,0.3);
+      color: var(--accent-blue);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 100px;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff 30%, #4f8ef7 70%, #9b6dff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+    .hero p {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto 30px;
+    }
+    .hero-tags {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .hero-tag {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* ─── NAV ─── */
+    .sticky-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(13,15,23,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 40px;
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+    }
+    .sticky-nav a {
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 16px 20px;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .sticky-nav a:hover { color: var(--text-primary); }
+    .sticky-nav a.active {
+      color: var(--accent-blue);
+      border-bottom-color: var(--accent-blue);
+    }
+
+    /* ─── LAYOUT ─── */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 50px 24px;
+    }
+
+    /* ─── SECTION HEADERS ─── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+    .section-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    .section-icon.blue { background: rgba(79,142,247,0.15); }
+    .section-icon.purple { background: rgba(155,109,255,0.15); }
+    .section-icon.green { background: rgba(62,207,142,0.15); }
+    .section-title h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .section-title p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    /* ─── DIVIDER ─── */
+    .section-divider {
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 60px 0;
+    }
+
+    /* ─── CARDS ─── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 20px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      border-color: var(--border-accent);
+      box-shadow: var(--shadow-card);
+    }
+    .card h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card p {
+      color: var(--text-secondary);
+      font-size: 14.5px;
+      line-height: 1.75;
+    }
+
+    /* ─── DEFINITION BOX ─── */
+    .definition-box {
+      background: linear-gradient(135deg, rgba(79,142,247,0.06), rgba(155,109,255,0.06));
+      border: 1px solid rgba(79,142,247,0.2);
+      border-left: 4px solid var(--accent-blue);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      margin: 20px 0;
+    }
+    .definition-box .label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent-blue);
+      margin-bottom: 8px;
+    }
+    .definition-box p {
+      font-size: 15px;
+      color: var(--text-primary);
+    }
+
+    /* ─── ANALOGY BOX ─── */
+    .analogy-box {
+      background: rgba(62,207,142,0.06);
+      border: 1px solid rgba(62,207,142,0.2);
+      border-left: 4px solid var(--accent-green);
+      border-radius: var(--radius-sm);
+      padding: 18px 24px;
+      margin: 16px 0;
+    }
+    .analogy-box .label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent-green);
+      margin-bottom: 8px;
+    }
+    .analogy-box p {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    /* ─── CLASS BOX DEMO ─── */
+    .uml-class-demo {
+      display: inline-block;
+      border: 2px solid var(--accent-blue);
+      border-radius: 6px;
+      overflow: hidden;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      min-width: 220px;
+    }
+    .uml-class-demo.interface { border-color: var(--accent-purple); }
+    .uml-class-demo.abstract { border-color: var(--accent-orange); }
+    .uml-class-demo.enum { border-color: var(--accent-green); }
+    .uml-class-header {
+      background: rgba(79,142,247,0.15);
+      padding: 10px 14px;
+      font-weight: 600;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      color: var(--accent-blue);
+    }
+    .uml-class-demo.interface .uml-class-header { background: rgba(155,109,255,0.15); color: var(--accent-purple); }
+    .uml-class-demo.abstract .uml-class-header { background: rgba(247,147,79,0.12); color: var(--accent-orange); }
+    .uml-class-demo.enum .uml-class-header { background: rgba(62,207,142,0.12); color: var(--accent-green); }
+    .uml-class-stereotype {
+      font-size: 11px;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--text-secondary);
+    }
+    .uml-section {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .uml-section:last-child { border-bottom: none; }
+    .uml-field { color: var(--text-secondary); padding: 2px 0; }
+    .uml-method { color: var(--text-primary); padding: 2px 0; }
+    .access-public { color: var(--accent-green); margin-right: 4px; }
+    .access-private { color: var(--accent-pink); margin-right: 4px; }
+    .access-protected { color: var(--accent-orange); margin-right: 4px; }
+    .access-package { color: var(--accent-cyan); margin-right: 4px; }
+
+    /* ─── RELATIONSHIP GRID ─── */
+    .rel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+      margin: 24px 0;
+    }
+    .rel-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      transition: border-color 0.2s;
+    }
+    .rel-card:hover { border-color: var(--border-accent); }
+    .rel-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .rel-badge {
+      padding: 4px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .rel-card h4 { font-size: 14px; font-weight: 600; }
+    .rel-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+    .rel-arrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      margin: 10px 0;
+      padding: 8px 12px;
+      background: var(--bg-secondary);
+      border-radius: 6px;
+      color: var(--text-primary);
+      display: block;
+    }
+    .rel-example {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    /* ─── ACCESS TABLE ─── */
+    .access-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin: 16px 0;
+    }
+    .access-table th {
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .access-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .access-table tr:last-child td { border-bottom: none; }
+    .access-table tr:hover td { background: var(--bg-card-hover); }
+    .symbol-big {
+      font-size: 18px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ─── SEQUENCE DIAGRAM ELEMENTS ─── */
+    .seq-demo {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 30px;
+      margin: 20px 0;
+      overflow-x: auto;
+    }
+    .seq-actors {
+      display: flex;
+      gap: 80px;
+      justify-content: flex-start;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .seq-actor {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .actor-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(79,142,247,0.15);
+      border: 2px solid var(--accent-blue);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .actor-box {
+      background: rgba(155,109,255,0.12);
+      border: 2px solid var(--accent-purple);
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--accent-purple);
+    }
+    .actor-name {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* ─── MSG LINES ─── */
+    .msg-demo {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 0 10px;
+    }
+    .msg-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+    }
+    .msg-from { width: 80px; text-align: right; color: var(--text-muted); font-size: 12px; }
+    .msg-arrow-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 400px;
+    }
+    .msg-arrow-line {
+      flex: 1;
+      height: 2px;
+      position: relative;
+    }
+    .msg-arrow-line.solid { background: var(--text-primary); }
+    .msg-arrow-line.dashed { background: repeating-linear-gradient(90deg, var(--text-secondary) 0 6px, transparent 6px 12px); }
+    .msg-label {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      color: var(--accent-cyan);
+      white-space: nowrap;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .msg-arrowhead { color: var(--text-primary); font-size: 12px; }
+    .msg-desc { color: var(--text-secondary); font-size: 12px; }
+    .msg-type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      margin: 4px 0;
+    }
+
+    /* ─── IMAGE SECTION ─── */
+    .img-showcase {
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin: 24px 0;
+    }
+    .img-showcase-header {
+      background: var(--bg-secondary);
+      padding: 12px 20px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .img-showcase img {
+      width: 100%;
+      display: block;
+    }
+
+    /* ─── INFO GRID ─── */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+      margin: 20px 0;
+    }
+    .info-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 18px;
+    }
+    .info-item-icon { font-size: 22px; margin-bottom: 10px; }
+    .info-item h4 { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+    .info-item p { font-size: 13px; color: var(--text-secondary); }
+
+    /* ─── FULL EXAMPLE ─── */
+    .example-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin: 24px 0;
+    }
+    .example-header {
+      background: linear-gradient(90deg, rgba(79,142,247,0.12), rgba(155,109,255,0.08));
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .example-header h3 {
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .example-body { padding: 24px; }
+    .example-body p { font-size: 14px; color: var(--text-secondary); margin-bottom: 12px; }
+
+    /* ─── CLASS DEMO LAYOUT ─── */
+    .class-demo-layout {
+      display: flex;
+      gap: 30px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+    .class-relation-arrow {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+
+    /* ─── SUMMARY BOX ─── */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin: 24px 0;
+    }
+    .summary-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px 18px;
+      border-top: 3px solid transparent;
+    }
+    .summary-item.blue { border-top-color: var(--accent-blue); }
+    .summary-item.purple { border-top-color: var(--accent-purple); }
+    .summary-item.green { border-top-color: var(--accent-green); }
+    .summary-item.orange { border-top-color: var(--accent-orange); }
+    .summary-item.pink { border-top-color: var(--accent-pink); }
+    .summary-item h4 { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .summary-item p { font-size: 12px; color: var(--text-secondary); }
+
+    /* ─── CODE BLOCK ─── */
+    .code-block {
+      background: #0a0c14;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      overflow-x: auto;
+      margin: 12px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      color: #c9d1d9;
+    }
+    .kw { color: #ff7b72; }
+    .cn { color: #79c0ff; }
+    .fn { color: #d2a8ff; }
+    .st { color: #a5d6ff; }
+    .cm { color: #555e7a; font-style: italic; }
+    .nm { color: #f7934f; }
+
+    /* ─── STEP BOX ─── */
+    .steps {
+      counter-reset: step-counter;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin: 16px 0;
+    }
+    .step {
+      counter-increment: step-counter;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px 20px 16px 64px;
+      position: relative;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    .step::before {
+      content: counter(step-counter);
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 32px;
+      background: var(--gradient-blue);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: white;
+      line-height: 32px;
+      text-align: center;
+    }
+    .step strong { color: var(--text-primary); }
+
+    /* ─── BADGE ─── */
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* ─── COMPARISON TABLE ─── */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+      margin: 16px 0;
+    }
+    .compare-table th {
+      background: var(--bg-secondary);
+      padding: 14px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid var(--border);
+    }
+    .compare-table td {
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+      vertical-align: top;
+    }
+    .compare-table tr:hover td { background: var(--bg-card-hover); }
+
+    /* ─── FOOTER ─── */
+    .footer {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      padding: 30px 40px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .footer span { color: var(--accent-blue); }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-in { animation: fadeSlideIn 0.5s ease both; }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-primary); }
+    ::-webkit-scrollbar-thumb { background: var(--border-accent); border-radius: 3px; }
+
+    /* ─── HIGHLIGHT LABEL ─── */
+    .hl-blue { color: var(--accent-blue); }
+    .hl-purple { color: var(--accent-purple); }
+    .hl-green { color: var(--accent-green); }
+    .hl-orange { color: var(--accent-orange); }
+    .hl-pink { color: var(--accent-pink); }
+    .hl-cyan { color: var(--accent-cyan); }
+
+    ul.note-list { list-style: none; display: flex; flex-direction: column; gap: 8px; padding: 0; }
+    ul.note-list li { padding-left: 22px; position: relative; font-size: 14px; color: var(--text-secondary); }
+    ul.note-list li::before { content: '▸'; position: absolute; left: 0; color: var(--accent-blue); }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--                         HERO                              -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<header class="hero">
+  <div class="hero-badge">📐 LLD Notes Series</div>
+  <h1>UML Diagrams</h1>
+  <p>Understand how software is designed visually — learn every notation with real-life examples that actually make sense.</p>
+  <div class="hero-tags">
+    <span class="hero-tag">📦 Class Diagram</span>
+    <span class="hero-tag">🔄 Sequence Diagram</span>
+    <span class="hero-tag">🔗 Relationships</span>
+    <span class="hero-tag">💡 Real Examples</span>
+    <span class="hero-tag">🏗️ LLD</span>
+  </div>
+</header>
+
+<!-- ─── NAV ─── -->
+<nav class="sticky-nav" id="top-nav">
+  <a href="#what-is-uml" class="active">What is UML?</a>
+  <a href="#class-diagram">Class Diagram</a>
+  <a href="#access-modifiers">Access Modifiers</a>
+  <a href="#class-types">Class Types</a>
+  <a href="#relationships">Relationships</a>
+  <a href="#sequence-diagram">Sequence Diagram</a>
+  <a href="#seq-elements">Seq Elements</a>
+  <a href="#seq-example">Seq Example</a>
+  <a href="#comparison">Class vs Sequence</a>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--                     WHAT IS UML                           -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<main class="container">
+
+  <section id="what-is-uml">
+    <div class="section-header">
+      <div class="section-icon blue">🗺️</div>
+      <div class="section-title">
+        <h2>What is UML?</h2>
+        <p>Unified Modeling Language — the blueprint language for software</p>
+      </div>
+    </div>
+
+    <div class="definition-box">
+      <div class="label">📖 Definition</div>
+      <p><strong>UML (Unified Modeling Language)</strong> is a standardized visual language used to design, plan, and communicate the structure and behavior of a software system. It's like an <strong>architect's blueprint</strong> — before building a house, you draw it first.</p>
+    </div>
+
+    <div class="analogy-box">
+      <div class="label">🏠 Real-Life Analogy</div>
+      <p>Imagine you're building a shopping mall. Before laying a single brick, architects draw floor plans, electrical diagrams, and plumbing maps. <strong>UML is exactly that for software</strong> — diagrams that show how classes are connected, how they talk to each other, and what data they hold.</p>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-item-icon">🎯</div>
+        <h4>Why Use UML?</h4>
+        <p>Visualize your system before writing code. Spot design problems early when they're cheap to fix.</p>
+      </div>
+      <div class="info-item">
+        <div class="info-item-icon">👥</div>
+        <h4>Team Communication</h4>
+        <p>A picture says 1000 lines of code. UML helps developers, architects, and managers share a common understanding.</p>
+      </div>
+      <div class="info-item">
+        <div class="info-item-icon">📚</div>
+        <h4>Documentation</h4>
+        <p>UML diagrams serve as living documentation that describes how your system is built and how it behaves.</p>
+      </div>
+      <div class="info-item">
+        <div class="info-item-icon">🛠️</div>
+        <h4>LLD Foundation</h4>
+        <p>Every Low-Level Design problem starts with a UML diagram — class diagram for structure, sequence for flow.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🗂️ Types of UML Diagrams</h3>
+      <p>UML has 14 diagram types, split into two groups. In LLD, we mainly use <span class="hl-blue">Class Diagram</span> and <span class="hl-purple">Sequence Diagram</span>.</p>
+      <br>
+      <div class="two-col">
+        <div>
+          <p style="color: var(--accent-blue); font-weight: 600; margin-bottom: 8px;">📦 Structural Diagrams (WHAT it is)</p>
+          <ul class="note-list">
+            <li><strong>Class Diagram</strong> ← Most Important for LLD</li>
+            <li>Object Diagram</li>
+            <li>Component Diagram</li>
+            <li>Deployment Diagram</li>
+          </ul>
+        </div>
+        <div>
+          <p style="color: var(--accent-purple); font-weight: 600; margin-bottom: 8px;">🔄 Behavioral Diagrams (HOW it works)</p>
+          <ul class="note-list">
+            <li><strong>Sequence Diagram</strong> ← Most Important for LLD</li>
+            <li>Use Case Diagram</li>
+            <li>Activity Diagram</li>
+            <li>State Machine Diagram</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider" />
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!--                    CLASS DIAGRAM                          -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section id="class-diagram">
+    <div class="section-header">
+      <div class="section-icon blue">📦</div>
+      <div class="section-title">
+        <h2>Class Diagram</h2>
+        <p>Shows the static structure — what classes exist and how they relate</p>
+      </div>
+    </div>
+
+    <div class="definition-box">
+      <div class="label">📖 Definition</div>
+      <p>A <strong>Class Diagram</strong> represents the <strong>structure</strong> of a system by showing classes, their attributes (data), methods (behavior), and the relationships between them. It's a snapshot of your code structure — before writing a single line of code.</p>
+    </div>
+
+    <div class="analogy-box">
+      <div class="label">🏦 Real-Life Analogy — Bank System</div>
+      <p>Think of classes as <strong>departments in a bank</strong>. The <code>Account</code> department has data (balance, account number) and actions (deposit, withdraw). The <code>Customer</code> department has a customer linked to one or many accounts. The class diagram shows these departments and their connections.</p>
+    </div>
+
+    <!-- CLASS BOX ANATOMY -->
+    <div class="card">
+      <h3>🏗️ Anatomy of a Class Box</h3>
+      <p>Every class in UML is drawn as a rectangle split into <strong>3 sections</strong>:</p>
+      <br>
+      <div class="class-demo-layout">
+        <div>
+          <div class="uml-class-demo">
+            <div class="uml-class-header">BankAccount</div>
+            <div class="uml-section">
+              <div class="uml-field"><span class="access-private">-</span>accountNumber : String</div>
+              <div class="uml-field"><span class="access-private">-</span>balance : double</div>
+              <div class="uml-field"><span class="access-private">-</span>owner : String</div>
+            </div>
+            <div class="uml-section">
+              <div class="uml-method"><span class="access-public">+</span>deposit(amount : double)</div>
+              <div class="uml-method"><span class="access-public">+</span>withdraw(amount : double) : bool</div>
+              <div class="uml-method"><span class="access-public">+</span>getBalance() : double</div>
+              <div class="uml-method"><span class="access-protected">#</span>validate() : bool</div>
+            </div>
+          </div>
+        </div>
+        <div style="flex:1; min-width: 240px;">
+          <ul class="note-list">
+            <li><strong style="color:var(--accent-blue)">Section 1 (Top)</strong> — Class Name (bold, centered)</li>
+            <li><strong style="color:var(--accent-orange)">Section 2 (Middle)</strong> — Attributes / Fields (data the class holds)</li>
+            <li><strong style="color:var(--accent-green)">Section 3 (Bottom)</strong> — Methods / Operations (what the class can do)</li>
+            <li>Format: <code style="color:var(--accent-cyan)">accessModifier name : type</code></li>
+          </ul>
+          <br>
+          <div class="analogy-box">
+            <div class="label">🏦 Think of it as</div>
+            <p>A bank form: header = account type name, middle = your info (name, balance), bottom = what you can do (deposit, withdraw).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!--                   ACCESS MODIFIERS                        -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section id="access-modifiers">
+    <div class="section-header" style="margin-top: 40px;">
+      <div class="section-icon purple">🔑</div>
+      <div class="section-title">
+        <h2>Access Modifiers</h2>
+        <p>Who can see what — the visibility rules in UML</p>
+      </div>
+    </div>
+
+    <div class="definition-box">
+      <div class="label">📖 Definition</div>
+      <p>Access modifiers define <strong>who can access</strong> an attribute or method. In UML, they are represented by a <strong>single symbol</strong> before the name.</p>
+    </div>
+
+    <div class="analogy-box">
+      <div class="label">🏠 Analogy — Rooms in a House</div>
+      <p>Think of a house: <strong>Public (+)</strong> = front door / living room (anyone can enter). <strong>Private (-)</strong> = your bedroom (only you). <strong>Protected (#)</strong> = family rooms (family members only). <strong>Package (~)</strong> = within the building/apartment complex.</p>
+    </div>
+
+    <table class="access-table">
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Name</th>
+          <th>Who Can Access</th>
+          <th>Real-Life Example</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="symbol-big access-public">+</span></td>
+          <td><span class="badge" style="background:rgba(62,207,142,0.15);color:var(--accent-green)">Public</span></td>
+          <td>Everyone (any class)</td>
+          <td>Hotel lobby — open to all guests</td>
+        </tr>
+        <tr>
+          <td><span class="symbol-big access-private">-</span></td>
+          <td><span class="badge" style="background:rgba(247,107,138,0.15);color:var(--accent-pink)">Private</span></td>
+          <td>Only the class itself</td>
+          <td>Your safe — only you know the PIN</td>
+        </tr>
+        <tr>
+          <td><span class="symbol-big access-protected">#</span></td>
+          <td><span class="badge" style="background:rgba(247,147,79,0.15);color:var(--accent-orange)">Protected</span></td>
+          <td>Class + its subclasses (children)</td>
+          <td>Family diary — you and your kids can read</td>
+        </tr>
+        <tr>
+          <td><span class="symbol-big access-package">~</span></td>
+          <td><span class="badge" style="background:rgba(79,217,247,0.15);color:var(--accent-cyan)">Package</span></td>
+          <td>Classes in same package</td>
+          <td>Office intranet — only employees can access</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!--                     CLASS TYPES                           -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section id="class-types">
+    <div class="section-header" style="margin-top: 40px;">
+      <div class="section-icon green">🏷️</div>
+      <div class="section-title">
+        <h2>Class Types in UML</h2>
+        <p>Not all classes are the same — 4 special types you must know</p>
+      </div>
+    </div>
+
+    <div class="rel-grid">
+
+      <!-- Concrete Class -->
+      <div class="rel-card">
+        <div class="rel-card-header">
+          <span class="rel-badge" style="background:rgba(79,142,247,0.15);color:var(--accent-blue)">Regular</span>
+          <h4>Concrete Class</h4>
+        </div>
+        <div style="display:flex; justify-content:center; margin: 14px 0;">
+          <div class="uml-class-demo" style="min-width:180px;">
+            <div class="uml-class-header">Car</div>
+            <div class="uml-section">
+              <div class="uml-field"><span class="access-private">-</span>brand : String</div>
+              <div class="uml-field"><span class="access-private">-</span>speed : int</div>
+            </div>
+            <div class="uml-section">
+              <div class="uml-method"><span class="access-public">+</span>drive()</div>
+            </div>
+          </div>
+        </div>
+        <p>A normal, fully implemented class. You can create objects from it directly.</p>
+        <div class="rel-example">🚗 Example: Car, BankAccount, Student — all real things you can "make"</div>
+      </div>
+
+      <!-- Abstract Class -->
+      <div class="rel-card">
+        <div class="rel-card-header">
+          <span class="rel-badge" style="background:rgba(247,147,79,0.15);color:var(--accent-orange)">Abstract</span>
+          <h4>Abstract Class</h4>
+        </div>
+        <div style="display:flex; justify-content:center; margin: 14px 0;">
+          <div class="uml-class-demo abstract" style="min-width:180px;">
+            <div class="uml-class-header"><div class="uml-class-stereotype">«abstract»</div>Vehicle</div>
+            <div class="uml-section">
+              <div class="uml-field"><span class="access-protected">#</span>speed : int</div>
+            </div>
+            <div class="uml-section">
+              <div class="uml-method"><span class="access-public">+</span><em>drive()</em></div>
+            </div>
+          </div>
+        </div>
+        <p>Has at least one <em>abstract</em> (unimplemented) method. Cannot be instantiated directly — needs a child class.</p>
+        <div class="rel-example">🚌 Example: Vehicle is abstract — Car, Bus, Bike implement drive() differently. Shown with <code>«abstract»</code> or <em>italic</em> method names.</div>
+      </div>
+
+      <!-- Interface -->
+      <div class="rel-card">
+        <div class="rel-card-header">
+          <span class="rel-badge" style="background:rgba(155,109,255,0.15);color:var(--accent-purple)">Interface</span>
+          <h4>Interface</h4>
+        </div>
+        <div style="display:flex; justify-content:center; margin: 14px 0;">
+          <div class="uml-class-demo interface" style="min-width:180px;">
+            <div class="uml-class-header"><div class="uml-class-stereotype">«interface»</div>Payable</div>
+            <div class="uml-section" style="min-height: 30px;"></div>
+            <div class="uml-section">
+              <div class="uml-method"><span class="access-public">+</span>pay(amount : double)</div>
+              <div class="uml-method"><span class="access-public">+</span>getReceipt() : String</div>
+            </div>
+          </div>
+        </div>
+        <p>A pure contract — only method signatures, no implementation. All methods are public by default. A class "implements" it.</p>
+        <div class="rel-example">💳 Example: Payable interface — CashPayment, UPIPayment, CardPayment all implement it differently.</div>
+      </div>
+
+      <!-- Enum -->
+      <div class="rel-card">
+        <div class="rel-card-header">
+          <span class="rel-badge" style="background:rgba(62,207,142,0.15);color:var(--accent-green)">Enum</span>
+          <h4>Enumeration</h4>
+        </div>
+        <div style="display:flex; justify-content:center; margin: 14px 0;">
+          <div class="uml-class-demo enum" style="min-width:180px;">
+            <div class="uml-class-header"><div class="uml-class-stereotype">«enumeration»</div>OrderStatus</div>
+            <div class="uml-section">
+              <div class="uml-field">PENDING</div>
+              <div class="uml-field">CONFIRMED</div>
+              <div class="uml-field">DELIVERED</div>
+              <div class="uml-field">CANCELLED</div>
+            </div>
+          </div>
+        </div>
+        <p>A fixed list of named constants. Used when a variable can only hold one of a few specific values.</p>
+        <div class="rel-example">🛒 Example: OrderStatus in Zomato — only PENDING, CONFIRMED, DELIVERED, or CANCELLED.</div>
+      </div>
+
+    </div>
+
+    <!-- Abstract vs Interface -->
+    <div class="card">
+      <h3>⚔️ Abstract Class vs Interface — Key Difference</h3>
+      <table class="compare-table">
+        <thead>
+          <tr><th>Feature</th><th>Abstract Class</th><th>Interface</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Has constructor?</td><td>✅ Yes</td><td>❌ No</td></tr>
+          <tr><td>Has fields/variables?</td><td>✅ Yes</td><td>❌ No (only constants)</td></tr>
+          <tr><td>Has implementation?</td><td>✅ Partial (some methods)</td><td>❌ None (pure contract)</td></tr>
+          <tr><td>Multiple inheritance?</td><td>❌ No (one parent only)</td><td>✅ Yes (implement many)</td></tr>
+          <tr><td>Access modifiers?</td><td>✅ Any (+, -, #)</td><td>✅ Public only by default</td></tr>
+          <tr><td>Real-life analogy</td><td>🧬 Blueprint with some parts built</td><td>📋 Pure contract/agreement</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!--                    RELATIONSHIPS                          -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section id="relationships">
+    <div class="section-header" style="margin-top: 40px;">
+      <div class="section-icon blue">🔗</div>
+      <div class="section-title">
+        <h2>Relationships in Class Diagram</h2>
+        <p>How classes connect to each other — 6 types with arrows</p>
+      </div>
+    </div>
+
+    <div class="definition-box">
+      <div class="label">📖 Why Relationships?</div>
+      <p>Classes never live in isolation — they talk to each other. <strong>Relationships define HOW</strong> they are connected — does one own the other? Does one use the other? Does one inherit from another?</p>
+    </div>
+
+    <!-- RELATIONSHIP CARDS -->
+    <div class="rel-grid">
+
+      <!-- Association -->
+      <div class="rel-card">
+        <div class="rel-card-header">
+          <span class="rel-badge" style="background:rgba(79,142,247,0.15);color:var(--accent-blue)">1</span>
+          <h4 class="hl-blue">Association</h4>
+        </div>
+        <span class="rel-arrow">A ──────────────→ B</span>
+        <p><strong>Loose connection</strong> — A uses B, but neither owns the other. Both can exist independently.</p>
+        <div class="rel-example">👨‍🏫 Teacher teaches Students — Teacher and Student exist independently, just connected.</div>
+        <div style="margin-top: 10px; font-size:12px; color: var(--text-secondary);">Arrow: <strong>Solid line, open arrowhead</strong></div>
+      </div>
+
+      <!-- Aggregation -->
+      <div class="rel-card">
+        <div class="rel-card-header">
+          <span class="rel-badge" style="background:rgba(247,217,79,0.15);color:var(--accent-yellow)">2</span>
+          <h4 class="hl-cyan">Aggregation</h4>
+        </div>
+        <span class="rel-arrow">A ◇──────────────→ B</span>
+        <p><strong>"Has-A" (weak)</strong> — A has B, but B can exist without A. It's a "whole-part" relationship, but parts survive if whole is destroyed.</p>
+        <div class="rel-example">🏫 School has Teachers — if School closes, Teachers still exist and can work elsewhere.</div>
+        <div style="margin-top: 10px; font-size:12px; color: var(--text-secondary);">Arrow: <strong>Solid line, hollow diamond</strong> at the "whole" side</div>
+      </div>
+
+      <!-- Composition -->
+      <div class="rel-card">
+        <div class="rel-card-header">
+          <span class="rel-badge" style="background:rgba(247,107,138,0.15);color:var(--accent-pink)">3</span>
+          <h4 class="hl-pink">Composition</h4>
+        </div>
+        <span class="rel-arrow">A ◆──────────────→ B</span>
+        <p><strong>"Has-A" (strong)</strong> — A owns B completely. B <em>cannot</em> exist without A. If A is destroyed, B is destroyed too.</p>
+        <div class="rel-example">🏠 House has Rooms — if House is demolished, Rooms no longer exist. Room can't survive without House.</div>
+        <div style="margin-top: 10px; font-size:12px; color: var(--text-secondary);">Arrow: <strong>Solid line, filled diamond</strong> at the "owner" side</div>
+      </div>
+
+      <!-- Inheritance / Generalization -->
+      <div class="rel-card">
+        <div class="rel-card-header">
+          <span class="rel-badge" style="background:rgba(62,207,142,0.15);color:var(--accent-green)">4</span>
+          <h4 class="hl-green">Inheritance (Generalization)</h4>
+        </div>
+        <span class="rel-arrow">Child ───────────▷ Parent</span>
+        <p><strong>"Is-A" relationship</strong> — Child class inherits all attributes and methods of the parent. Child is a more specific version of the parent.</p>
+        <div class="rel-example">🐾 Dog is-a Animal, Car is-a Vehicle, SavingsAccount is-a BankAccount — inherits all parent behavior.</div>
+        <div style="margin-top: 10px; font-size:12px; color: var(--text-secondary);">Arrow: <strong>Solid line, hollow triangle arrowhead</strong> pointing to parent</div>
+      </div>
+
+      <!-- Realization / Implementation -->
+      <div class="rel-card">
+        <div class="rel-card-header">
+          <span class="rel-badge" style="background:rgba(155,109,255,0.15);color:var(--accent-purple)">5</span>
+          <h4 class="hl-purple">Realization (Implementation)</h4>
+        </div>
+        <span class="rel-arrow">Class - - - - - - ▷ «interface»</span>
+        <p><strong>Class implements an Interface</strong> — the class promises to provide all methods defined in the interface (the contract).</p>
+        <div class="rel-example">💳 CashPayment implements Payable interface — Cash class must implement pay() and getReceipt().</div>
+        <div style="margin-top: 10px; font-size:12px; color: var(--text-secondary);">Arrow: <strong>Dashed line, hollow triangle arrowhead</strong></div>
+      </div>
+
+      <!-- Dependency -->
+      <div class="rel-card">
+        <div class="rel-card-header">
+          <span class="rel-badge" style="background:rgba(247,147,79,0.15);color:var(--accent-orange)">6</span>
+          <h4 class="hl-orange">Dependency</h4>
+        </div>
+        <span class="rel-arrow">A - - - - - - - -→ B</span>
+        <p><strong>Weak, temporary use</strong> — A uses B briefly (as a parameter or local variable), but doesn't hold a permanent reference to it.</p>
+        <div class="rel-example">🧾 Order depends on PaymentService to process payment — it uses it temporarily, not a permanent relationship.</div>
+        <div style="margin-top: 10px; font-size:12px; color: var(--text-secondary);">Arrow: <strong>Dashed line, open arrowhead</strong></div>
+      </div>
+
+    </div>
+
+    <!-- MULTIPLICITY -->
+    <div class="card">
+      <h3>🔢 Multiplicity (Cardinality) — How Many?</h3>
+      <p>Numbers on the ends of relationship lines show <strong>how many instances</strong> are involved on each side.</p>
+      <br>
+      <table class="access-table">
+        <thead>
+          <tr><th>Notation</th><th>Meaning</th><th>Real-Life Example</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code style="color:var(--accent-blue); font-size:16px">1</code></td><td>Exactly one</td><td>One person has one passport</td></tr>
+          <tr><td><code style="color:var(--accent-blue); font-size:16px">0..1</code></td><td>Zero or one (optional)</td><td>A person may or may not have a car</td></tr>
+          <tr><td><code style="color:var(--accent-blue); font-size:16px">*</code> or <code style="color:var(--accent-blue); font-size:16px">0..*</code></td><td>Zero or more</td><td>A teacher teaches 0 or many students</td></tr>
+          <tr><td><code style="color:var(--accent-blue); font-size:16px">1..*</code></td><td>One or more</td><td>An order must have at least 1 item</td></tr>
+          <tr><td><code style="color:var(--accent-blue); font-size:16px">m..n</code></td><td>Between m and n</td><td>A team has 5..11 players</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- FULL EXAMPLE - PARKING LOT -->
+    <div class="example-section">
+      <div class="example-header">
+        <span>🅿️</span>
+        <h3>Full Class Diagram Example — Parking Lot System</h3>
+      </div>
+      <div class="example-body">
+        <p>Here's your actual Parking Lot class diagram — let's read it using all the notations we learned:</p>
+        <div class="img-showcase">
+          <div class="img-showcase-header">
+            📁 ClassDiagram.png — Parking Lot System
+          </div>
+          <img src="ClassDiagram.png" alt="Parking Lot Class Diagram" />
+        </div>
+
+        <p><strong>Reading this diagram:</strong></p>
+        <ul class="note-list">
+          <li><strong>ParkingLot</strong> (Concrete Class) — has private fields: spots list, allocationStrategy, paymentStrategy</li>
+          <li><strong>Vehicle</strong> (<code>«abstract»</code>) — Car, Bike, Truck <span class="hl-green">inherit (is-a)</span> from it</li>
+          <li><strong>ISpotAllocationStrategy</strong> (<code>«interface»</code>) — FirstAvailableSpotStrategy <span class="hl-purple">implements (realizes)</span> it</li>
+          <li><strong>IPaymentStrategy</strong> (<code>«interface»</code>) — CashPayment, CreditCardPayment <span class="hl-purple">implement</span> it</li>
+          <li><strong>ParkingLot ◆→ Ticket</strong> — <span class="hl-pink">Composition</span>: Ticket can't exist without ParkingLot</li>
+          <li><strong>SpotType, VehicleType</strong> — <code>«enumeration»</code> with fixed values like COMPACT, LARGE, CAR, BIKE</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- AGGREGATION VS COMPOSITION -->
+    <div class="card">
+      <h3>💡 Aggregation vs Composition — The Easiest Way to Remember</h3>
+      <div class="two-col">
+        <div class="analogy-box">
+          <div class="label">◇ Aggregation — "Can Survive Alone"</div>
+          <p>Library has Books. If Library burns down, the <strong>books (data) still exist</strong> elsewhere. Parts are independent.</p>
+        </div>
+        <div class="analogy-box" style="border-left-color: var(--accent-pink); background: rgba(247,107,138,0.06);">
+          <div class="label" style="color:var(--accent-pink)">◆ Composition — "Dies Together"</div>
+          <p>Human has a Heart. If Human dies, the <strong>Heart stops existing</strong> as a functioning organ. Parts can't exist alone.</p>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <hr class="section-divider" />
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!--                  SEQUENCE DIAGRAM                         -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section id="sequence-diagram">
+    <div class="section-header">
+      <div class="section-icon purple">🔄</div>
+      <div class="section-title">
+        <h2>Sequence Diagram</h2>
+        <p>Shows the dynamic behavior — how objects interact over time</p>
+      </div>
+    </div>
+
+    <div class="definition-box">
+      <div class="label">📖 Definition</div>
+      <p>A <strong>Sequence Diagram</strong> shows the <strong>order of interactions</strong> between objects in a system over time. It focuses on <em>who calls whom, when, and in what order</em>. Think of it as a <strong>script/screenplay</strong> of your system's story.</p>
+    </div>
+
+    <div class="analogy-box">
+      <div class="label">🍕 Real-Life Analogy — Ordering on Zomato</div>
+      <p>You (User) open the app → Zomato shows restaurants → You place an order → Restaurant receives it → Delivery partner picks up → You get the food. This step-by-step time-ordered flow is exactly what a Sequence Diagram shows!</p>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-item-icon">⏱️</div>
+        <h4>Time Flows Downward</h4>
+        <p>Top of diagram = beginning. Bottom = end. Read sequence diagrams top to bottom like a story.</p>
+      </div>
+      <div class="info-item">
+        <div class="info-item-icon">↔️</div>
+        <h4>Horizontal = Communication</h4>
+        <p>Arrows going left/right between participants show messages being sent between them.</p>
+      </div>
+      <div class="info-item">
+        <div class="info-item-icon">📋</div>
+        <h4>Complements Class Diagram</h4>
+        <p>Class diagram = structure (WHAT). Sequence diagram = behavior (HOW). Together they tell the full story.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!--                  SEQUENCE ELEMENTS                        -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section id="seq-elements">
+    <div class="section-header" style="margin-top: 40px;">
+      <div class="section-icon purple">🧩</div>
+      <div class="section-title">
+        <h2>Sequence Diagram Elements</h2>
+        <p>Every building block — participants, lifelines, messages, fragments</p>
+      </div>
+    </div>
+
+    <!-- PARTICIPANTS -->
+    <div class="card">
+      <h3>👤 Participants (Actors & Objects)</h3>
+      <p>Participants are shown at the <strong>top of the diagram</strong> as boxes or actors. Each one has a vertical dashed line called a <strong>Lifeline</strong> going down.</p>
+      <br>
+      <div class="seq-demo">
+        <div class="seq-actors">
+          <!-- Actor -->
+          <div class="seq-actor">
+            <div style="font-size:32px; line-height:1;">🧍</div>
+            <div style="font-size:12px; color:var(--text-secondary); text-align:center;">Client<br><span style="font-size:10px;color:var(--text-muted)">(Actor / Human User)</span></div>
+          </div>
+          <!-- Object boxes -->
+          <div class="seq-actor">
+            <div class="actor-box">OrderService</div>
+            <div class="actor-name">Object / Class<br><span style="font-size:10px;color:var(--text-muted)">(Rectangle box)</span></div>
+          </div>
+          <div class="seq-actor">
+            <div class="actor-box">PaymentService</div>
+            <div class="actor-name">Object / Class</div>
+          </div>
+          <div class="seq-actor">
+            <div class="actor-box">Database</div>
+            <div class="actor-name">System / Component</div>
+          </div>
+        </div>
+        <div style="font-size:13px; color:var(--text-secondary); text-align:center;">↑ Each box has a dashed vertical line (lifeline) going down through the diagram</div>
+      </div>
+      <ul class="note-list" style="margin-top:14px;">
+        <li><strong>Stick figure / actor</strong> → human user or external system</li>
+        <li><strong>Rectangle box</strong> → an object or class in your system</li>
+        <li><strong>Dashed vertical line</strong> → lifeline (the participant's timeline)</li>
+        <li><strong>Thick box on lifeline</strong> → activation bar (when the object is actively doing something)</li>
+      </ul>
+    </div>
+
+    <!-- MESSAGE TYPES -->
+    <div class="card">
+      <h3>✉️ Message Types (Arrows)</h3>
+      <p>Arrows between participants represent <strong>messages / method calls</strong>. Different arrow styles = different types of calls.</p>
+      <br>
+      <div class="rel-grid">
+
+        <div class="rel-card">
+          <div class="rel-card-header">
+            <span class="rel-badge" style="background:rgba(79,142,247,0.15);color:var(--accent-blue)">1</span>
+            <h4>Synchronous Call</h4>
+          </div>
+          <span class="rel-arrow">A ──────────────▶ B</span>
+          <p>Caller <strong>waits</strong> for the response before doing anything else. Like calling someone on the phone — you wait for them to pick up.</p>
+          <div class="rel-example">🏦 User → BankSystem: deposit(5000) — user waits for confirmation</div>
+          <div style="margin-top:8px; font-size:12px; color:var(--text-muted)">Arrow: Solid line, filled arrowhead</div>
+        </div>
+
+        <div class="rel-card">
+          <div class="rel-card-header">
+            <span class="rel-badge" style="background:rgba(62,207,142,0.15);color:var(--accent-green)">2</span>
+            <h4>Return Message</h4>
+          </div>
+          <span class="rel-arrow">A ◀ - - - - - - - B</span>
+          <p>Response going <strong>back</strong> to the caller. The reply to a previous synchronous call.</p>
+          <div class="rel-example">🏦 BankSystem → User: returns "Success" after deposit</div>
+          <div style="margin-top:8px; font-size:12px; color:var(--text-muted)">Arrow: Dashed line, open arrowhead going back</div>
+        </div>
+
+        <div class="rel-card">
+          <div class="rel-card-header">
+            <span class="rel-badge" style="background:rgba(247,147,79,0.15);color:var(--accent-orange)">3</span>
+            <h4>Asynchronous Call</h4>
+          </div>
+          <span class="rel-arrow">A ──────────────⇒ B</span>
+          <p>Caller sends message and <strong>does NOT wait</strong> — continues doing other things. Fire and forget.</p>
+          <div class="rel-example">📧 System sends email notification — doesn't wait for user to read it</div>
+          <div style="margin-top:8px; font-size:12px; color:var(--text-muted)">Arrow: Solid line, half-open arrowhead</div>
+        </div>
+
+        <div class="rel-card">
+          <div class="rel-card-header">
+            <span class="rel-badge" style="background:rgba(155,109,255,0.15);color:var(--accent-purple)">4</span>
+            <h4>Self-Call (Recursive)</h4>
+          </div>
+          <span class="rel-arrow">A ──→ A (curves back)</span>
+          <p>An object calling its <strong>own method</strong>. Arrow goes out and curves back to the same object.</p>
+          <div class="rel-example">🔄 Validator calls validate() on itself to check internal state</div>
+          <div style="margin-top:8px; font-size:12px; color:var(--text-muted)">Arrow: Loops back to same lifeline</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- COMBINED FRAGMENTS -->
+    <div class="card">
+      <h3>📦 Combined Fragments (Control Flow)</h3>
+      <p>Fragments are <strong>rectangular frames</strong> that show conditional logic, loops, and alternatives — like if/else and for-loop in diagrams.</p>
+      <br>
+      <div class="rel-grid">
+
+        <div class="rel-card">
+          <div class="rel-card-header">
+            <span class="rel-badge" style="background:rgba(79,142,247,0.15);color:var(--accent-blue)">alt</span>
+            <h4>Alternative (alt)</h4>
+          </div>
+          <p>Like an <strong>if-else</strong> statement. The dashed line inside divides conditions. Only ONE branch executes.</p>
+          <div class="rel-example">💳 [Payment Success] → show receipt <br>- - - - - - - - - - -<br>[Payment Failed] → show error</div>
+        </div>
+
+        <div class="rel-card">
+          <div class="rel-card-header">
+            <span class="rel-badge" style="background:rgba(62,207,142,0.15);color:var(--accent-green)">opt</span>
+            <h4>Optional (opt)</h4>
+          </div>
+          <p>Like an <strong>if (without else)</strong>. The messages inside only happen if the condition is true.</p>
+          <div class="rel-example">🎁 [User is premium] → apply discount. If not premium, nothing happens.</div>
+        </div>
+
+        <div class="rel-card">
+          <div class="rel-card-header">
+            <span class="rel-badge" style="background:rgba(247,147,79,0.15);color:var(--accent-orange)">loop</span>
+            <h4>Loop (loop)</h4>
+          </div>
+          <p>Shows a <strong>repeating sequence</strong>. Like a for/while loop in code.</p>
+          <div class="rel-example">🛒 [for each item in cart] → add to order. Repeats until all items processed.</div>
+        </div>
+
+        <div class="rel-card">
+          <div class="rel-card-header">
+            <span class="rel-badge" style="background:rgba(247,217,79,0.15);color:var(--accent-yellow)">ref</span>
+            <h4>Reference (ref)</h4>
+          </div>
+          <p>Points to <strong>another sequence diagram</strong>. Used to keep diagrams clean by extracting complex flows.</p>
+          <div class="rel-example">📎 ref: Authentication Flow — reuses the login diagram without repeating it.</div>
+        </div>
+
+        <div class="rel-card">
+          <div class="rel-card-header">
+            <span class="rel-badge" style="background:rgba(155,109,255,0.15);color:var(--accent-purple)">par</span>
+            <h4>Parallel (par)</h4>
+          </div>
+          <p>Shows <strong>concurrent / parallel</strong> execution. Multiple things happen at the same time.</p>
+          <div class="rel-example">⚡ Send email AND send SMS notification simultaneously — both happen at once.</div>
+        </div>
+
+        <div class="rel-card">
+          <div class="rel-card-header">
+            <span class="rel-badge" style="background:rgba(79,217,247,0.15);color:var(--accent-cyan)">break</span>
+            <h4>Break (break)</h4>
+          </div>
+          <p><strong>Breaks out</strong> of the current flow when a condition is met. Like a break/return in code.</p>
+          <div class="rel-example">🚨 [Account locked] → break — stop current login flow immediately.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ACTIVATION BAR -->
+    <div class="card">
+      <h3>⬛ Activation Bar (Execution Box)</h3>
+      <p>A <strong>thin rectangle</strong> on the lifeline that shows when an object is <strong>actively executing</strong> (processing a request). Appears when a method is being run and disappears when it returns.</p>
+      <div class="analogy-box" style="margin-top: 14px;">
+        <div class="label">💡 Analogy</div>
+        <p>Think of it like a <strong>busy indicator</strong>. When your phone is actively loading a page, a spinner shows. The activation bar is that spinner — it shows the object is working right now.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!--                   SEQUENCE EXAMPLE                        -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section id="seq-example">
+    <div class="section-header" style="margin-top: 40px;">
+      <div class="section-icon green">🅿️</div>
+      <div class="section-title">
+        <h2>Reading a Sequence Diagram</h2>
+        <p>Walk through the Parking Lot sequence diagram step by step</p>
+      </div>
+    </div>
+
+    <div class="img-showcase">
+      <div class="img-showcase-header">
+        📁 SequenceDiagram.png — Parking Lot: Park & Unpark Flow
+      </div>
+      <img src="SequenceDiagram.png" alt="Parking Lot Sequence Diagram" />
+    </div>
+
+    <div class="example-section">
+      <div class="example-header">
+        <span>📖</span>
+        <h3>Step-by-Step Reading — parkVehicle() Flow</h3>
+      </div>
+      <div class="example-body">
+        <ol class="steps">
+          <li><strong>Client → ParkingLot:</strong> <code>parkVehicle(vehicle)</code> — User calls the park method with their vehicle.</li>
+          <li><strong>ParkingLot → ISpotAllocationStrategy:</strong> <code>findSpot(spots, vehicle)</code> — ParkingLot asks the strategy to find an available spot.</li>
+          <li><strong>[alt] Spot found:</strong> Strategy returns a ParkingSpot back to ParkingLot.</li>
+          <li><strong>ParkingLot → ParkingSpot:</strong> <code>occupy(vehicle)</code> — The spot is marked as occupied.</li>
+          <li><strong>ParkingSpot → Ticket:</strong> <code>create Ticket</code> — A new Ticket is created for this parking session (Composition!).</li>
+          <li><strong>ParkingLot → Client:</strong> returns the Ticket — User gets their parking ticket.</li>
+          <li><strong>[alt] No spot available:</strong> Returns <code>null</code>, Client gets <code>NoSpotAvailableException</code>.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="example-section">
+      <div class="example-header">
+        <span>📖</span>
+        <h3>Step-by-Step Reading — unparkVehicle() Flow</h3>
+      </div>
+      <div class="example-body">
+        <ol class="steps">
+          <li><strong>Client → ParkingLot:</strong> <code>unparkVehicle(ticket)</code> — User returns with their ticket to leave.</li>
+          <li><strong>ParkingLot → IPaymentStrategy:</strong> <code>calculateFee(ticket)</code> — Calculates the parking fee from the ticket's entry/exit time.</li>
+          <li><strong>IPaymentStrategy → ParkingLot:</strong> returns <code>fee</code> amount.</li>
+          <li><strong>ParkingLot → IPaymentStrategy:</strong> <code>pay(fee)</code> — Processes payment.</li>
+          <li><strong>[alt] Payment Successful:</strong> <code>vacate()</code> called on ParkingSpot → spot becomes available again → Client gets Receipt.</li>
+          <li><strong>[alt] Payment Failed:</strong> Returns <code>failure</code> → Client gets <code>Payment Failed</code> message.</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- COMBINED DIAGRAM -->
+    <div class="img-showcase">
+      <div class="img-showcase-header">
+        📁 Diagrams.png — Full Overview: Class + Sequence Diagram Together
+      </div>
+      <img src="Diagrams.png" alt="Full UML Overview" />
+    </div>
+
+    <div class="card">
+      <h3>🔍 Key Observations from the Diagrams</h3>
+      <ul class="note-list">
+        <li>The <span class="hl-blue">Class Diagram</span> shows what objects exist (ParkingLot, Vehicle, Ticket, etc.) and their relationships</li>
+        <li>The <span class="hl-purple">Sequence Diagram</span> shows HOW those same objects communicate during parkVehicle and unparkVehicle operations</li>
+        <li>The <span class="hl-pink">Composition</span> (◆) between ParkingLot and Ticket in class diagram = reflected in sequence where Ticket is created inside parkVehicle</li>
+        <li>The <span class="hl-green">«interface»</span> ISpotAllocationStrategy and IPaymentStrategy in class diagram = appear as participants in sequence diagram</li>
+        <li><strong>alt fragments</strong> in sequence = if-else handling for "spot found/not found" and "payment success/failure"</li>
+      </ul>
+    </div>
+  </section>
+
+  <hr class="section-divider" />
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!--              CLASS vs SEQUENCE COMPARISON                 -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section id="comparison">
+    <div class="section-header">
+      <div class="section-icon green">⚖️</div>
+      <div class="section-title">
+        <h2>Class Diagram vs Sequence Diagram</h2>
+        <p>Two sides of the same coin — structure vs behavior</p>
+      </div>
+    </div>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>📦 Class Diagram</th>
+          <th>🔄 Sequence Diagram</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Focus</strong></td><td>Structure (WHAT exists)</td><td>Behavior (HOW it works)</td></tr>
+        <tr><td><strong>Shows</strong></td><td>Classes, attributes, methods, relationships</td><td>Messages, method calls, order of execution</td></tr>
+        <tr><td><strong>Time dimension</strong></td><td>❌ Static (no time)</td><td>✅ Dynamic (time flows top→bottom)</td></tr>
+        <tr><td><strong>When to use</strong></td><td>Design the data model and architecture</td><td>Design the flow for a specific use case</td></tr>
+        <tr><td><strong>Analogy</strong></td><td>📋 A floor plan of a building</td><td>🎬 A script/screenplay of what happens in the building</td></tr>
+        <tr><td><strong>Main elements</strong></td><td>Classes, interfaces, enums, arrows</td><td>Participants, lifelines, messages, fragments</td></tr>
+        <tr><td><strong>In LLD</strong></td><td>Draw first — shows all classes needed</td><td>Draw after — shows how classes interact</td></tr>
+      </tbody>
+    </table>
+
+    <!-- QUICK REFERENCE SUMMARY -->
+    <div class="card" style="margin-top: 30px;">
+      <h3>⚡ Quick Reference — All Symbols at a Glance</h3>
+      <br>
+      <p style="color:var(--accent-blue); font-weight:600; margin-bottom:10px;">CLASS DIAGRAM SYMBOLS</p>
+      <div class="summary-grid">
+        <div class="summary-item blue"><h4>+ (Public)</h4><p>Open to everyone</p></div>
+        <div class="summary-item pink"><h4>- (Private)</h4><p>Only this class</p></div>
+        <div class="summary-item orange"><h4># (Protected)</h4><p>Class + children</p></div>
+        <div class="summary-item blue"><h4>──▷ (Inheritance)</h4><p>Is-A relationship</p></div>
+        <div class="summary-item purple"><h4>--▷ (Realization)</h4><p>Implements interface</p></div>
+        <div class="summary-item green"><h4>◇── (Aggregation)</h4><p>Has-A (weak)</p></div>
+        <div class="summary-item pink"><h4>◆── (Composition)</h4><p>Has-A (strong/owns)</p></div>
+        <div class="summary-item orange"><h4>──→ (Association)</h4><p>Loose use relationship</p></div>
+      </div>
+      <br>
+      <p style="color:var(--accent-purple); font-weight:600; margin-bottom:10px;">SEQUENCE DIAGRAM SYMBOLS</p>
+      <div class="summary-grid">
+        <div class="summary-item blue"><h4>──▶ Sync Call</h4><p>Wait for response</p></div>
+        <div class="summary-item green"><h4>--▶ Return</h4><p>Response back</p></div>
+        <div class="summary-item orange"><h4>⬛ Activation Bar</h4><p>Actively processing</p></div>
+        <div class="summary-item purple"><h4>[alt] Fragment</h4><p>If-else conditions</p></div>
+        <div class="summary-item orange"><h4>[loop] Fragment</h4><p>Repeating block</p></div>
+        <div class="summary-item pink"><h4>[opt] Fragment</h4><p>Optional block (if only)</p></div>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<!-- ─── FOOTER ─── -->
+<footer class="footer">
+  <p>📐 <span>UML Diagrams Notes</span> · LLD Learning Series · Made for easy understanding with real-life examples</p>
+</footer>
+
+<script>
+  // Active nav on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.sticky-nav a');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(link => link.classList.remove('active'));
+        const active = document.querySelector(`.sticky-nav a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-40% 0px -55% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+
+  // Smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // Animate cards on scroll
+  const cards = document.querySelectorAll('.card, .rel-card, .info-item, .summary-item');
+  const cardObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  cards.forEach(card => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+    cardObserver.observe(card);
+  });
+</script>
+
+</body>
+</html>

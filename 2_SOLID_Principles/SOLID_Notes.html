@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SOLID Principles — LLD Notes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0c0e1a;
+      --bg2: #111320;
+      --bg3: #171b2e;
+      --bg4: #1c2038;
+      --border: #252a42;
+      --border2: #303660;
+      --text: #e4e8f5;
+      --muted: #7a82a0;
+      --dim: #454d6a;
+
+      /* Per-principle accent colors */
+      --srp:  #4f8ef7;  /* blue   */
+      --ocp:  #3ecf8e;  /* green  */
+      --lsp:  #f7934f;  /* orange */
+      --isp:  #c97fff;  /* purple */
+      --dip:  #f76b8a;  /* pink   */
+
+      --code-bg: #090b14;
+      --radius: 14px;
+      --radius-sm: 8px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.75;
+      min-height: 100vh;
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 70px 40px 56px;
+      text-align: center;
+      background: linear-gradient(160deg, #0c0e1a 0%, #111a38 60%, #0c0e1a 100%);
+      border-bottom: 1px solid var(--border);
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 700px 300px at 20% 50%, rgba(79,142,247,.07) 0%, transparent 70%),
+        radial-gradient(ellipse 500px 300px at 80% 40%, rgba(201,127,255,.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(79,142,247,.1); border: 1px solid rgba(79,142,247,.3);
+      color: var(--srp); font-size: 11px; font-weight: 700;
+      letter-spacing: 1.8px; text-transform: uppercase;
+      padding: 6px 16px; border-radius: 100px; margin-bottom: 22px;
+    }
+    .hero h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(2.2rem, 6vw, 4rem);
+      font-weight: 800; line-height: 1.15;
+      background: linear-gradient(135deg, #fff 20%, #4f8ef7 55%, #c97fff 90%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; margin-bottom: 16px;
+    }
+    .hero p {
+      color: var(--muted); font-size: 1.05rem;
+      max-width: 560px; margin: 0 auto 30px;
+    }
+    .hero-pills { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .hero-pill {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg3); border: 1px solid var(--border);
+      padding: 7px 16px; border-radius: 100px; font-size: 13px;
+      font-weight: 600; transition: border-color .2s;
+    }
+    .hero-pill:hover { border-color: var(--border2); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* ── STICKY NAV ── */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(12,14,26,.92); backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      display: flex; gap: 0; overflow-x: auto;
+      padding: 0 20px;
+    }
+    .nav a {
+      text-decoration: none; color: var(--muted);
+      font-size: 13px; font-weight: 500;
+      padding: 15px 18px;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap; transition: all .2s;
+    }
+    .nav a:hover { color: var(--text); }
+    .nav a.active { border-bottom-color: var(--srp); color: var(--srp); }
+
+    /* ── OVERVIEW MAP ── */
+    .overview {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 32px;
+      margin: 40px 0; position: relative; overflow: hidden;
+    }
+    .overview::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--srp), var(--ocp), var(--lsp), var(--isp), var(--dip));
+    }
+    .overview h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.1rem; font-weight: 700; margin-bottom: 24px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .mind-map {
+      display: flex; flex-direction: column; align-items: center; gap: 0;
+    }
+    .mm-root {
+      background: linear-gradient(135deg, rgba(79,142,247,.15), rgba(201,127,255,.12));
+      border: 2px solid rgba(79,142,247,.4);
+      border-radius: 10px; padding: 12px 32px;
+      font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 700;
+      color: var(--text); text-align: center;
+    }
+    .mm-line-down {
+      width: 2px; height: 30px;
+      background: linear-gradient(to bottom, rgba(79,142,247,.4), transparent);
+      margin: 0 auto;
+    }
+    .mm-branches {
+      display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+    }
+    .mm-branch {
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .mm-branch-line {
+      width: 2px; height: 24px; margin: 0 auto;
+    }
+    .mm-node {
+      padding: 10px 20px; border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600;
+      border: 1.5px solid; text-align: center; min-width: 80px;
+      cursor: pointer; transition: transform .2s, box-shadow .2s;
+    }
+    .mm-node:hover { transform: translateY(-2px); }
+    .mm-node.srp { color: var(--srp); border-color: var(--srp); background: rgba(79,142,247,.1); box-shadow: 0 0 0 0 rgba(79,142,247,0); }
+    .mm-node.srp:hover { box-shadow: 0 4px 20px rgba(79,142,247,.25); }
+    .mm-node.ocp { color: var(--ocp); border-color: var(--ocp); background: rgba(62,207,142,.1); }
+    .mm-node.ocp:hover { box-shadow: 0 4px 20px rgba(62,207,142,.25); }
+    .mm-node.lsp { color: var(--lsp); border-color: var(--lsp); background: rgba(247,147,79,.1); }
+    .mm-node.lsp:hover { box-shadow: 0 4px 20px rgba(247,147,79,.25); }
+    .mm-node.isp { color: var(--isp); border-color: var(--isp); background: rgba(201,127,255,.1); }
+    .mm-node.isp:hover { box-shadow: 0 4px 20px rgba(201,127,255,.25); }
+    .mm-node.dip { color: var(--dip); border-color: var(--dip); background: rgba(247,107,138,.1); }
+    .mm-node.dip:hover { box-shadow: 0 4px 20px rgba(247,107,138,.25); }
+
+    /* ── NOTEBOOK IMAGE ── */
+    .notebook-ref {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; margin: 24px 0;
+    }
+    .notebook-ref-header {
+      background: var(--bg2); padding: 12px 20px;
+      font-size: 12px; font-weight: 600; color: var(--muted);
+      letter-spacing: .5px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .notebook-ref img { width: 100%; display: block; }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 1060px; margin: 0 auto; padding: 50px 24px; }
+
+    /* ── PRINCIPLE SECTION ── */
+    .principle-section {
+      margin-bottom: 70px; scroll-margin-top: 60px;
+    }
+    .principle-header {
+      display: flex; align-items: flex-start; gap: 20px; margin-bottom: 30px;
+    }
+    .principle-badge {
+      width: 68px; height: 68px; border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 20px; font-weight: 700; flex-shrink: 0;
+      border: 2px solid;
+    }
+    .principle-title { flex: 1; }
+    .principle-title h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.85rem; font-weight: 800; line-height: 1.2;
+      margin-bottom: 6px;
+    }
+    .principle-title .subtitle {
+      font-size: 14px; color: var(--muted); font-weight: 400;
+    }
+    .principle-number {
+      font-size: 11px; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 6px;
+    }
+
+    /* per-principle colors */
+    .srp .principle-badge { color: var(--srp); border-color: var(--srp); background: rgba(79,142,247,.1); }
+    .srp .principle-title h2 { color: var(--srp); }
+    .srp .principle-number { color: var(--srp); }
+
+    .ocp .principle-badge { color: var(--ocp); border-color: var(--ocp); background: rgba(62,207,142,.1); }
+    .ocp .principle-title h2 { color: var(--ocp); }
+    .ocp .principle-number { color: var(--ocp); }
+
+    .lsp .principle-badge { color: var(--lsp); border-color: var(--lsp); background: rgba(247,147,79,.1); }
+    .lsp .principle-title h2 { color: var(--lsp); }
+    .lsp .principle-number { color: var(--lsp); }
+
+    .isp .principle-badge { color: var(--isp); border-color: var(--isp); background: rgba(201,127,255,.1); }
+    .isp .principle-title h2 { color: var(--isp); }
+    .isp .principle-number { color: var(--isp); }
+
+    .dip .principle-badge { color: var(--dip); border-color: var(--dip); background: rgba(247,107,138,.1); }
+    .dip .principle-title h2 { color: var(--dip); }
+    .dip .principle-number { color: var(--dip); }
+
+    /* ── BOXES ── */
+    .def-box {
+      border-radius: var(--radius-sm); padding: 20px 24px; margin: 16px 0;
+      border-left: 4px solid; border: 1px solid;
+    }
+    .def-box .label {
+      font-size: 10px; font-weight: 700; letter-spacing: 1.8px;
+      text-transform: uppercase; margin-bottom: 8px;
+    }
+    .def-box p { font-size: 14.5px; }
+
+    .def-box.blue  { background: rgba(79,142,247,.06);  border-color: rgba(79,142,247,.25);  border-left: 4px solid var(--srp); }
+    .def-box.green { background: rgba(62,207,142,.06);  border-color: rgba(62,207,142,.25);  border-left: 4px solid var(--ocp); }
+    .def-box.orange{ background: rgba(247,147,79,.06);  border-color: rgba(247,147,79,.25);  border-left: 4px solid var(--lsp); }
+    .def-box.purple{ background: rgba(201,127,255,.06); border-color: rgba(201,127,255,.25); border-left: 4px solid var(--isp); }
+    .def-box.pink  { background: rgba(247,107,138,.06); border-color: rgba(247,107,138,.25); border-left: 4px solid var(--dip); }
+
+    .def-box.blue  .label  { color: var(--srp); }
+    .def-box.green .label  { color: var(--ocp); }
+    .def-box.orange .label { color: var(--lsp); }
+    .def-box.purple .label { color: var(--isp); }
+    .def-box.pink  .label  { color: var(--dip); }
+
+    /* ── VS BOX ── */
+    .vs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    @media (max-width: 640px) { .vs-grid { grid-template-columns: 1fr; } }
+    .vs-box {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 18px;
+    }
+    .vs-box .vs-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .vs-box p, .vs-box li { font-size: 13.5px; color: var(--muted); line-height: 1.65; }
+    .vs-box.bad { border-top: 3px solid #f76b8a; }
+    .vs-box.good { border-top: 3px solid #3ecf8e; }
+    .vs-box.bad .vs-label { color: #f76b8a; }
+    .vs-box.good .vs-label { color: #3ecf8e; }
+
+    /* ── CODE BLOCK ── */
+    .code-wrap {
+      background: var(--code-bg); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); overflow: hidden; margin: 16px 0;
+    }
+    .code-header {
+      background: var(--bg3); padding: 10px 18px;
+      font-size: 12px; color: var(--muted); font-weight: 500;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .code-dots { display: flex; gap: 6px; }
+    .code-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .code-dots .r { background: #f76b8a; }
+    .code-dots .y { background: #f7d94f; }
+    .code-dots .g { background: #3ecf8e; }
+    pre {
+      padding: 18px 20px; overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px; line-height: 1.85;
+      color: #c9d1d9; tab-size: 2;
+    }
+    .kw  { color: #ff7b72; }
+    .cn  { color: #79c0ff; }
+    .fn  { color: #d2a8ff; }
+    .st  { color: #a5d6ff; }
+    .cm  { color: #4a5270; font-style: italic; }
+    .nm  { color: #f7934f; }
+    .hl  { background: rgba(79,142,247,.08); display: block; border-left: 2px solid var(--srp); padding-left: 8px; margin-left: -8px;}
+    .hl-red { background: rgba(247,107,138,.07); display: block; border-left: 2px solid #f76b8a; padding-left: 8px; margin-left: -8px; }
+    .hl-green-line { background: rgba(62,207,142,.07); display: block; border-left: 2px solid #3ecf8e; padding-left: 8px; margin-left: -8px; }
+
+    /* ── INFO GRID ── */
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+    .info-item {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 18px;
+      transition: border-color .2s, transform .2s;
+    }
+    .info-item:hover { border-color: var(--border2); transform: translateY(-2px); }
+    .info-item .ico { font-size: 22px; margin-bottom: 10px; }
+    .info-item h4 { font-size: 13.5px; font-weight: 600; margin-bottom: 6px; }
+    .info-item p  { font-size: 12.5px; color: var(--muted); }
+
+    /* ── LSP RULES ── */
+    .lsp-rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; margin: 24px 0; }
+    .lsp-rule {
+      background: var(--bg3); border: 1px solid rgba(247,147,79,.25);
+      border-radius: var(--radius-sm); overflow: hidden;
+    }
+    .lsp-rule-header {
+      background: rgba(247,147,79,.1); padding: 14px 18px;
+      border-bottom: 1px solid rgba(247,147,79,.2);
+      font-weight: 700; font-size: 14px;
+      color: var(--lsp); display: flex; align-items: center; gap: 8px;
+    }
+    .lsp-rule-body { padding: 16px 18px; }
+    .lsp-rule-body p { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+    .sub-rule {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 12.5px; color: var(--muted); margin-bottom: 8px;
+      padding: 8px 12px; background: var(--bg4);
+      border-radius: 6px; border-left: 2px solid var(--lsp);
+    }
+    .sub-rule strong { color: var(--text); display: block; margin-bottom: 2px; font-size: 13px; }
+    .arrow-icon { color: var(--lsp); font-size: 14px; margin-top: 1px; }
+
+    /* ── COMPARISON TABLE ── */
+    .cmp-table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 20px 0; }
+    .cmp-table th {
+      background: var(--bg2); color: var(--muted); font-size: 11px;
+      font-weight: 700; text-transform: uppercase; letter-spacing: .6px;
+      padding: 13px 16px; text-align: left; border-bottom: 2px solid var(--border);
+    }
+    .cmp-table td { padding: 13px 16px; border-bottom: 1px solid var(--border); color: var(--muted); vertical-align: top; }
+    .cmp-table tr:hover td { background: var(--bg3); }
+    .cmp-table .sym { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+    /* ── STEP LIST ── */
+    .steps { list-style: none; counter-reset: s; display: flex; flex-direction: column; gap: 12px; }
+    .step {
+      counter-increment: s; position: relative;
+      padding: 14px 18px 14px 58px;
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); font-size: 13.5px; color: var(--muted);
+    }
+    .step::before {
+      content: counter(s); position: absolute; left: 16px; top: 50%;
+      transform: translateY(-50%); width: 28px; height: 28px;
+      background: linear-gradient(135deg, var(--srp), #9b6dff);
+      border-radius: 50%; display: grid; place-items: center;
+      font-size: 12px; font-weight: 700; color: #fff;
+    }
+    .step strong { color: var(--text); }
+
+    /* ── NOTE LIST ── */
+    ul.nl { list-style: none; display: flex; flex-direction: column; gap: 7px; padding: 0; margin: 12px 0; }
+    ul.nl li { padding-left: 20px; position: relative; font-size: 13.5px; color: var(--muted); }
+    ul.nl li::before { content: '▸'; position: absolute; left: 0; color: var(--srp); }
+
+    /* ── DIVIDER ── */
+    hr.div {
+      border: none; height: 1px; margin: 60px 0;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
+
+    /* ── SUMMARY TABLE ── */
+    .summary-bar {
+      display: flex; flex-wrap: wrap; gap: 0;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; margin: 30px 0;
+    }
+    .sb-item {
+      flex: 1; min-width: 150px; padding: 20px 18px;
+      border-right: 1px solid var(--border);
+      transition: background .2s;
+    }
+    .sb-item:last-child { border-right: none; }
+    .sb-item:hover { background: var(--bg3); }
+    .sb-acr {
+      font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .sb-name { font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 8px; letter-spacing: .5px; }
+    .sb-desc { font-size: 12px; color: var(--dim); line-height: 1.5; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadein { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+    .principle-section { animation: fadein .4s ease both; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--bg2); border-top: 1px solid var(--border);
+      text-align: center; padding: 28px 24px;
+      font-size: 13px; color: var(--dim);
+    }
+    footer span { color: var(--srp); }
+
+    code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: var(--bg3); padding: 2px 6px; border-radius: 4px; color: #d2a8ff; }
+
+    /* ── WIDE CODE SPLIT ── */
+    .code-split { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
+    @media (max-width: 700px) { .code-split { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════ HERO ════════════════════════ -->
+<header class="hero">
+  <div class="hero-badge">📐 LLD Notes Series · Module 2</div>
+  <h1>SOLID Design Principles</h1>
+  <p>5 rules every software engineer must know — learn them with real code examples from Parking Lot &amp; Google Docs.</p>
+  <div class="hero-pills">
+    <span class="hero-pill"><span class="dot" style="background:var(--srp)"></span>S — SRP</span>
+    <span class="hero-pill"><span class="dot" style="background:var(--ocp)"></span>O — OCP</span>
+    <span class="hero-pill"><span class="dot" style="background:var(--lsp)"></span>L — LSP</span>
+    <span class="hero-pill"><span class="dot" style="background:var(--isp)"></span>I — ISP</span>
+    <span class="hero-pill"><span class="dot" style="background:var(--dip)"></span>D — DIP</span>
+  </div>
+</header>
+
+<!-- ════════════════════════ NAV ════════════════════════ -->
+<nav class="nav" id="main-nav">
+  <a href="#overview" class="active">Overview</a>
+  <a href="#srp">SRP</a>
+  <a href="#ocp">OCP</a>
+  <a href="#lsp">LSP</a>
+  <a href="#isp">ISP</a>
+  <a href="#dip">DIP</a>
+  <a href="#summary">Summary</a>
+</nav>
+
+<main class="container">
+
+  <!-- ════════════════════════ OVERVIEW ════════════════════════ -->
+  <section id="overview" class="principle-section">
+    <div class="overview">
+      <h3>🗺️ Your Notebook Reference</h3>
+
+      <!-- NOTEBOOK IMAGE - YOUR HANDWRITTEN NOTES -->
+      <div class="notebook-ref" style="margin-bottom:28px;">
+        <div class="notebook-ref-header">
+          ✍️ Your Handwritten Notes — SOLID Design Principles Mind Map
+        </div>
+        <img src="../notebook_solid_reference.jpg" alt="Handwritten SOLID Notes" onerror="this.parentElement.style.display='none'" />
+      </div>
+
+      <!-- MIND MAP REPLICA -->
+      <div class="mind-map">
+        <div class="mm-root">SOLID Design Principles</div>
+        <div class="mm-line-down"></div>
+        <div class="mm-branches">
+          <div class="mm-branch">
+            <div class="mm-branch-line" style="background: var(--srp)"></div>
+            <a href="#srp" class="mm-node srp" style="text-decoration:none">SRP</a>
+          </div>
+          <div class="mm-branch">
+            <div class="mm-branch-line" style="background: var(--ocp)"></div>
+            <a href="#ocp" class="mm-node ocp" style="text-decoration:none">OCP</a>
+          </div>
+          <div class="mm-branch">
+            <div class="mm-branch-line" style="background: var(--lsp)"></div>
+            <div>
+              <a href="#lsp" class="mm-node lsp" style="text-decoration:none">LSP</a>
+              <div style="display:flex; gap:10px; margin-top:8px;">
+                <div style="background:rgba(247,147,79,.08);border:1px solid rgba(247,147,79,.25);border-radius:6px;padding:6px 10px;font-size:11px;color:var(--lsp);text-align:center;">
+                  <div style="font-weight:700">Signature Rule</div>
+                  <div style="color:var(--muted);margin-top:4px;">→ Method Assignment</div>
+                  <div style="color:var(--muted);">→ Return Type</div>
+                  <div style="color:var(--muted);">→ Exception</div>
+                </div>
+                <div style="background:rgba(247,147,79,.08);border:1px solid rgba(247,147,79,.25);border-radius:6px;padding:6px 10px;font-size:11px;color:var(--lsp);text-align:center;">
+                  <div style="font-weight:700">Property Rule</div>
+                  <div style="color:var(--muted);margin-top:4px;">→ Class Invariant</div>
+                  <div style="color:var(--muted);">→ History Constraint</div>
+                </div>
+                <div style="background:rgba(247,147,79,.08);border:1px solid rgba(247,147,79,.25);border-radius:6px;padding:6px 10px;font-size:11px;color:var(--lsp);text-align:center;">
+                  <div style="font-weight:700">Method Rule</div>
+                  <div style="color:var(--muted);margin-top:4px;">→ Pre-condition</div>
+                  <div style="color:var(--muted);">→ Post-condition</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mm-branch">
+            <div class="mm-branch-line" style="background: var(--isp)"></div>
+            <a href="#isp" class="mm-node isp" style="text-decoration:none">ISP</a>
+          </div>
+          <div class="mm-branch">
+            <div class="mm-branch-line" style="background: var(--dip)"></div>
+            <a href="#dip" class="mm-node dip" style="text-decoration:none">DIP</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WHAT IS SOLID -->
+    <div class="def-box blue">
+      <div class="label">📖 What is SOLID?</div>
+      <p><strong>SOLID</strong> is a set of <strong>5 design principles</strong> introduced by Robert C. Martin (Uncle Bob) that help you write software that is easy to <strong>maintain, extend, and understand</strong>. Each letter stands for one principle. Together, they prevent your code from becoming a tangled mess.</p>
+    </div>
+
+    <div class="def-box green" style="border-left-color: var(--ocp);">
+      <div class="label" style="color:var(--ocp);">🏠 Real-Life Analogy</div>
+      <p>Think of SOLID like the rules a good architect follows. <strong>SRP</strong> = one room has one purpose. <strong>OCP</strong> = add rooms without demolishing old ones. <strong>LSP</strong> = replace a light bulb with any compatible one. <strong>ISP</strong> = kitchen has only kitchen tools, not car tools. <strong>DIP</strong> = use a universal charger, not a device-specific wire.</p>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-item"><div class="ico">🔧</div><h4>Maintainable Code</h4><p>Easy to fix bugs without breaking other parts.</p></div>
+      <div class="info-item"><div class="ico">🔄</div><h4>Extensible Design</h4><p>Add new features without touching existing working code.</p></div>
+      <div class="info-item"><div class="ico">🧪</div><h4>Testable Units</h4><p>Small, focused classes are easier to unit test.</p></div>
+      <div class="info-item"><div class="ico">👥</div><h4>Team Friendly</h4><p>Clear responsibilities = less merge conflicts and confusion.</p></div>
+    </div>
+  </section>
+
+  <hr class="div" />
+
+  <!-- ════════════════════════ SRP ════════════════════════ -->
+  <section id="srp" class="principle-section srp">
+    <div class="principle-header">
+      <div class="principle-badge">S</div>
+      <div class="principle-title">
+        <div class="principle-number">Principle 1 of 5</div>
+        <h2>Single Responsibility Principle</h2>
+        <div class="subtitle">A class should have only <strong>one reason to change</strong></div>
+      </div>
+    </div>
+
+    <div class="def-box blue">
+      <div class="label">📖 Definition</div>
+      <p>Every class should do <strong>exactly one thing</strong> and be responsible for only <strong>one part</strong> of the system. If your class has multiple reasons to change (e.g., business logic changes AND database changes), it violates SRP.</p>
+    </div>
+
+    <div class="def-box green" style="border-left-color:var(--ocp)">
+      <div class="label" style="color:var(--ocp)">🏦 Real-Life Analogy</div>
+      <p>A <strong>Chef</strong> cooks food. A <strong>Waiter</strong> serves it. A <strong>Cashier</strong> collects payment. Each person has ONE job. If the chef also had to collect payment AND serve food AND cook — the kitchen would be chaotic. That's a God Class!</p>
+    </div>
+
+    <!-- VIOLATION vs FIX -->
+    <div class="vs-grid">
+      <div class="vs-box bad">
+        <div class="vs-label">❌ Violation — God Class</div>
+        <p>Imagine a <code>Ticket</code> class that:</p>
+        <ul class="nl" style="margin-top:8px;">
+          <li>Stores ticket data (id, entry time, fee)</li>
+          <li>Calculates parking fee (business logic)</li>
+          <li>Saves itself to the database (DB logic)</li>
+          <li>Generates PDF receipt (formatting)</li>
+        </ul>
+        <br><p>If tax rules change → edit Ticket. If DB changes → edit Ticket. If PDF format changes → edit Ticket. <strong>Too many reasons to change!</strong></p>
+      </div>
+      <div class="vs-box good">
+        <div class="vs-label">✅ Fix — Split Responsibilities</div>
+        <ul class="nl">
+          <li><code>Ticket</code> → only holds data</li>
+          <li><code>FeeCalculator</code> → calculates fee</li>
+          <li><code>TicketRepository</code> → saves to DB</li>
+          <li><code>ReceiptGenerator</code> → makes PDF</li>
+        </ul>
+        <br><p>Each class has <strong>one reason to change</strong>. Fee logic changes? Only touch <code>FeeCalculator</code>. DB changes? Only touch <code>TicketRepository</code>.</p>
+      </div>
+    </div>
+
+    <!-- CODE EXAMPLE -->
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        Vehicle_Parking.cpp — SRP in Action
+      </div>
+      <pre><span class="cm">// ❌ VIOLATION: Ticket class doing too many things</span>
+<span class="cm">// Bad: Ticket holds data + calculates fee + saves to DB</span>
+<span class="hl-red"><span class="kw">class</span> <span class="cn">BadTicket</span> {</span>
+<span class="hl-red">    <span class="kw">void</span> <span class="fn">calculateFee</span>()  { <span class="cm">/* tax logic */</span> }  <span class="cm">// ← NOT ticket's job</span></span>
+<span class="hl-red">    <span class="kw">void</span> <span class="fn">saveToDatabase</span>() { <span class="cm">/* DB code */</span> }   <span class="cm">// ← NOT ticket's job</span></span>
+<span class="hl-red">};                                                   <span class="cm">// 3 reasons to change!</span></span>
+
+<span class="cm">// ✅ FIX: Each class has ONE job</span>
+<span class="hl-green-line"><span class="kw">class</span> <span class="cn">Ticket</span> {              <span class="cm">// ← Only stores ticket data</span></span>
+<span class="hl-green-line"><span class="kw">public</span>:</span>
+<span class="hl-green-line">    string ticketId;</span>
+<span class="hl-green-line">    <span class="cn">Vehicle</span>* vehicle;</span>
+<span class="hl-green-line">    <span class="cn">ParkingSpot</span>* spot;</span>
+<span class="hl-green-line">    <span class="kw">int</span> entryTime;           <span class="cm">// That's it! No fee calc, no DB</span></span>
+<span class="hl-green-line">};</span>
+
+<span class="hl-green-line"><span class="kw">class</span> <span class="cn">PaymentStrategy</span> {     <span class="cm">// ← Separate class for fee calculation</span></span>
+<span class="hl-green-line"><span class="kw">public</span>:</span>
+<span class="hl-green-line">    <span class="kw">virtual</span> <span class="kw">double</span> <span class="fn">calculateFee</span>(<span class="cn">Ticket</span>* t) = <span class="nm">0</span>;</span>
+<span class="hl-green-line">    <span class="kw">virtual</span> <span class="kw">void</span> <span class="fn">pay</span>(<span class="kw">double</span> amount) = <span class="nm">0</span>;</span>
+<span class="hl-green-line">};</span>
+
+<span class="cm">// ParkingLot delegates — doesn't do everything itself</span>
+<span class="hl-green-line"><span class="kw">class</span> <span class="cn">ParkingLot</span> {</span>
+<span class="hl-green-line">    <span class="cn">SpotAllocationStrategy</span>* allocation; <span class="cm">// delegates spot finding</span></span>
+<span class="hl-green-line">    <span class="cn">PaymentStrategy</span>* payment;           <span class="cm">// delegates payment</span></span>
+<span class="hl-green-line">};</span></pre>
+    </div>
+
+    <!-- GOOGLE DOCS EXAMPLE -->
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        Google_Docs.cpp — SRP: Document vs Persistence
+      </div>
+      <pre><span class="cm">// Document class has ONE job: hold and render elements</span>
+<span class="hl-green-line"><span class="kw">class</span> <span class="cn">Document</span> {                 <span class="cm">// ← only manages content</span></span>
+<span class="hl-green-line">    vector&lt;<span class="cn">DocumentElement</span>*&gt; elements;</span>
+<span class="hl-green-line">    string <span class="fn">render</span>();               <span class="cm">// render to string - that's it!</span></span>
+<span class="hl-green-line">};</span>
+
+<span class="cm">// Persistence class has ONE job: saving</span>
+<span class="hl-green-line"><span class="kw">class</span> <span class="cn">Persistence</span> {             <span class="cm">// ← only knows about saving</span></span>
+<span class="hl-green-line">    <span class="kw">virtual</span> <span class="kw">void</span> <span class="fn">save</span>(string data) = <span class="nm">0</span>;</span>
+<span class="hl-green-line">};</span>
+
+<span class="cm">// DocumentEditor orchestrates — but delegates actual work</span>
+<span class="hl-green-line"><span class="kw">class</span> <span class="cn">DocumentEditor</span> {          <span class="cm">// ← only manages user interactions</span></span>
+<span class="hl-green-line">    <span class="cn">Document</span>* document;         <span class="cm">// delegates rendering to Document</span></span>
+<span class="hl-green-line">    <span class="cn">Persistence</span>* storage;       <span class="cm">// delegates saving to Persistence</span></span>
+<span class="hl-green-line">};</span></pre>
+    </div>
+
+    <div class="def-box blue">
+      <div class="label">💡 Quick Rule</div>
+      <p>Ask yourself: <strong>"How many reasons does this class have to change?"</strong> If the answer is more than 1, you're violating SRP. Split it up!</p>
+    </div>
+  </section>
+
+  <hr class="div" />
+
+  <!-- ════════════════════════ OCP ════════════════════════ -->
+  <section id="ocp" class="principle-section ocp">
+    <div class="principle-header">
+      <div class="principle-badge">O</div>
+      <div class="principle-title">
+        <div class="principle-number">Principle 2 of 5</div>
+        <h2>Open/Closed Principle</h2>
+        <div class="subtitle">Open for <strong>extension</strong>, closed for <strong>modification</strong></div>
+      </div>
+    </div>
+
+    <div class="def-box green">
+      <div class="label">📖 Definition</div>
+      <p>You should be able to <strong>add new functionality</strong> (extend) without <strong>changing existing working code</strong> (modify). Add new behavior by adding new classes — not by editing old ones.</p>
+    </div>
+
+    <div class="def-box blue" style="border-left-color:var(--srp)">
+      <div class="label" style="color:var(--srp)">🏭 Real-Life Analogy</div>
+      <p>Think of a <strong>smartphone</strong>. You can install new apps (extend functionality) without modifying the phone's hardware or OS (no modification). The phone is <strong>closed for modification</strong> (you can't change the chip) but <strong>open for extension</strong> (install any app).</p>
+    </div>
+
+    <div class="vs-grid">
+      <div class="vs-box bad">
+        <div class="vs-label">❌ Violation — if/else hell</div>
+        <p>One massive <code>ParkingSpot</code> class with if-else:</p>
+        <pre style="background:transparent;padding:0;font-size:11.5px;color:#f76b8a;margin-top:8px;">if (type == COMPACT)     { ... }
+else if (type == LARGE)  { ... }
+else if (type == MOTOR)  { ... }
+<span style="color:#f7d94f">// Add ElectricSpot? Must EDIT this!</span></pre>
+        <p style="margin-top:8px;">Changing existing code = risking new bugs.</p>
+      </div>
+      <div class="vs-box good">
+        <div class="vs-label">✅ Fix — Polymorphism</div>
+        <pre style="background:transparent;padding:0;font-size:11.5px;color:#3ecf8e;margin-top:8px;">class ParkingSpot { virtual canFitVehicle() = 0; }
+class CompactSpot : ParkingSpot { ... }
+class LargeSpot   : ParkingSpot { ... }
+class ElectricSpot: ParkingSpot { ... }  // NEW!</pre>
+        <p style="margin-top:8px;">Add <code>ElectricSpot</code>? Just create a new class. Zero changes to existing code!</p>
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        Vehicle_Parking.cpp — OCP with Abstract ParkingSpot
+      </div>
+      <pre><span class="cm">// Base class — CLOSED for modification (don't touch this)</span>
+<span class="kw">class</span> <span class="cn">ParkingSpot</span> {                 <span class="cm">// abstract base</span>
+<span class="kw">public</span>:
+    <span class="kw">virtual</span> <span class="kw">bool</span> <span class="fn">canFitVehicle</span>(<span class="cn">Vehicle</span>* v) = <span class="nm">0</span>; <span class="cm">// define the contract</span>
+    <span class="kw">void</span> <span class="fn">occupy</span>(<span class="cn">Vehicle</span>* v)  { vehicle = v; isOccupied = <span class="kw">true</span>; }
+    <span class="kw">void</span> <span class="fn">vacate</span>()             { vehicle = <span class="kw">nullptr</span>; isOccupied = <span class="kw">false</span>; }
+};
+
+<span class="cm">// OPEN for extension — add new spot types by creating new classes</span>
+<span class="hl-green-line"><span class="kw">class</span> <span class="cn">CompactSpot</span> : <span class="kw">public</span> <span class="cn">ParkingSpot</span> {  <span class="cm">// NEW class, no edits to base</span></span>
+<span class="hl-green-line"><span class="kw">public</span>:</span>
+<span class="hl-green-line">    <span class="kw">bool</span> <span class="fn">canFitVehicle</span>(<span class="cn">Vehicle</span>* v) <span class="kw">override</span> {</span>
+<span class="hl-green-line">        <span class="kw">return</span> (v-&gt;type == <span class="nm">CAR</span> || v-&gt;type == <span class="nm">BIKE</span>);</span>
+<span class="hl-green-line">    }</span>
+<span class="hl-green-line">};</span>
+
+<span class="cm">// Tomorrow, add ElectricSpot — zero changes to existing code!</span>
+<span class="hl-green-line"><span class="kw">class</span> <span class="cn">ElectricSpot</span> : <span class="kw">public</span> <span class="cn">ParkingSpot</span> { <span class="cm">// just add new class</span></span>
+<span class="hl-green-line"><span class="kw">public</span>:</span>
+<span class="hl-green-line">    <span class="kw">bool</span> <span class="fn">canFitVehicle</span>(<span class="cn">Vehicle</span>* v) <span class="kw">override</span> {</span>
+<span class="hl-green-line">        <span class="kw">return</span> v-&gt;isElectric; <span class="cm">// new logic, old code untouched</span></span>
+<span class="hl-green-line">    }</span>
+<span class="hl-green-line">};</span>
+
+<span class="cm">// SpotAllocationStrategy also follows OCP</span>
+<span class="kw">class</span> <span class="cn">SpotAllocationStrategy</span> {         <span class="cm">// closed base</span>
+<span class="kw">    virtual</span> <span class="cn">ParkingSpot</span>* <span class="fn">findSpot</span>(...) = <span class="nm">0</span>;
+};
+<span class="kw">class</span> <span class="cn">FirstAvailableSpot</span> : <span class="kw">public</span> <span class="cn">SpotAllocationStrategy</span> { <span class="cm">/* open extension */</span> };
+<span class="hl-green-line"><span class="kw">class</span> <span class="cn">NearestExitSpot</span>   : <span class="kw">public</span> <span class="cn">SpotAllocationStrategy</span> { <span class="cm">/* add new strategy */</span> };</span></pre>
+    </div>
+
+    <div class="def-box green">
+      <div class="label">💡 Quick Rule</div>
+      <p><strong>"Can I add new behavior without touching existing classes?"</strong> If yes → OCP satisfied. The magic tool is <strong>abstraction + polymorphism</strong> — use virtual/abstract base classes and add new concrete classes for new behavior.</p>
+    </div>
+  </section>
+
+  <hr class="div" />
+
+  <!-- ════════════════════════ LSP ════════════════════════ -->
+  <section id="lsp" class="principle-section lsp">
+    <div class="principle-header">
+      <div class="principle-badge">L</div>
+      <div class="principle-title">
+        <div class="principle-number">Principle 3 of 5</div>
+        <h2>Liskov Substitution Principle</h2>
+        <div class="subtitle">Subtypes must be <strong>substitutable</strong> for their base types</div>
+      </div>
+    </div>
+
+    <div class="def-box orange">
+      <div class="label">📖 Definition</div>
+      <p>If class <code>B</code> is a subclass of class <code>A</code>, then anywhere you use <code>A</code>, you should be able to use <code>B</code> without breaking the program. The child class must <strong>behave correctly</strong> wherever the parent is used — no surprises!</p>
+    </div>
+
+    <div class="def-box green" style="border-left-color:var(--ocp)">
+      <div class="label" style="color:var(--ocp)">🔌 Real-Life Analogy</div>
+      <p>Any <strong>USB charger</strong> should work in any USB port. If you buy a "USB charger" (subtype of Charger), it should charge your phone correctly — it shouldn't explode or do nothing. If a subclass behaves unexpectedly, it violates LSP. Like buying a "charger" that only works on Tuesdays — that's a bad subtype!</p>
+    </div>
+
+    <!-- YOUR 3 SUB-RULES FROM NOTEBOOK -->
+    <div style="margin: 24px 0;">
+      <p style="font-size:13px; color:var(--muted); margin-bottom:16px; font-weight:600; text-transform:uppercase; letter-spacing:.8px;">📓 From Your Notes — The 3 LSP Rules</p>
+      <div class="lsp-rules">
+
+        <!-- SIGNATURE RULE -->
+        <div class="lsp-rule">
+          <div class="lsp-rule-header">📝 Signature Rule</div>
+          <div class="lsp-rule-body">
+            <p>The child class must have the <strong>same method signatures</strong> as the parent. Three sub-rules:</p>
+            <div class="sub-rule">
+              <span class="arrow-icon">→</span>
+              <div>
+                <strong>Method Assignment (Contravariance of parameters)</strong>
+                Child can accept <em>same or broader</em> parameter types than parent. Never narrower.
+              </div>
+            </div>
+            <div class="sub-rule">
+              <span class="arrow-icon">→</span>
+              <div>
+                <strong>Return Type (Covariance of return)</strong>
+                Child can return <em>same or more specific</em> type than parent. Never broader.
+              </div>
+            </div>
+            <div class="sub-rule">
+              <span class="arrow-icon">→</span>
+              <div>
+                <strong>Exception Rule</strong>
+                Child can only throw <em>same or fewer/narrower</em> exceptions than parent. Never new unexpected ones.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PROPERTY RULE -->
+        <div class="lsp-rule">
+          <div class="lsp-rule-header">🏗️ Property Rule</div>
+          <div class="lsp-rule-body">
+            <p>The child class must maintain the same <strong>state rules</strong> as the parent. Two sub-rules:</p>
+            <div class="sub-rule">
+              <span class="arrow-icon">→</span>
+              <div>
+                <strong>Class Invariant</strong>
+                Any condition that was always true in the parent must still be always true in the child.
+                <br><em style="font-size:11px;">e.g.: balance must always be ≥ 0 in BankAccount — child SavingsAccount must also maintain this.</em>
+              </div>
+            </div>
+            <div class="sub-rule">
+              <span class="arrow-icon">→</span>
+              <div>
+                <strong>History Constraint</strong>
+                If parent only allows state changes in certain ways, child cannot allow new forbidden state changes.
+                <br><em style="font-size:11px;">e.g.: If parent says "can't change ID after creation", child must also not allow it.</em>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- METHOD RULE -->
+        <div class="lsp-rule">
+          <div class="lsp-rule-header">⚙️ Method Rule</div>
+          <div class="lsp-rule-body">
+            <p>Each method in the child must respect the parent's <strong>behavior contract</strong>. Two sub-rules:</p>
+            <div class="sub-rule">
+              <span class="arrow-icon">→</span>
+              <div>
+                <strong>Pre-condition (Weaken or same)</strong>
+                Child method can only have <em>weaker or equal</em> pre-conditions than parent. Never stricter.
+                <br><em style="font-size:11px;">If parent's deposit() accepts amount ≥ 0, child can't demand amount ≥ 100.</em>
+              </div>
+            </div>
+            <div class="sub-rule">
+              <span class="arrow-icon">→</span>
+              <div>
+                <strong>Post-condition (Strengthen or same)</strong>
+                Child method must produce <em>same or stronger</em> guarantees than parent. Never weaker.
+                <br><em style="font-size:11px;">If parent guarantees withdraw() reduces balance by exactly the amount, child must too.</em>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CODE EXAMPLE -->
+    <div class="vs-grid">
+      <div class="vs-box bad">
+        <div class="vs-label">❌ Violation — Bike has turnOnAC()</div>
+        <pre style="background:transparent;padding:0;font-size:11.5px;color:var(--muted);margin-top:8px;"><span class="kw">class</span> Vehicle {
+  <span class="kw">virtual void</span> <span class="fn">turnOnAC</span>();  <span class="cm">// on parent</span>
+};
+<span class="kw">class</span> Bike : Vehicle {
+  <span class="kw">void</span> <span class="fn">turnOnAC</span>() {
+    <span class="fn">throw</span> <span class="st">"Bikes have no AC!"</span>;
+  }  <span class="cm">// ❌ LSP broken!</span>
+};</span>
+<span style="color:#f76b8a;font-size:12px;">Using Vehicle* v = new Bike();
+v->turnOnAC(); // CRASH! Surprise!</span></pre>
+      </div>
+      <div class="vs-box good">
+        <div class="vs-label">✅ Fix — Use canFitVehicle() check</div>
+        <pre style="background:transparent;padding:0;font-size:11.5px;color:var(--muted);margin-top:8px;"><span class="cm">// Vehicle only has what ALL vehicles do</span>
+<span class="kw">class</span> Vehicle {
+  string licensePlate;
+  <span class="cn">VehicleType</span> type;  <span class="cm">// common to all</span>
+};
+<span class="cm">// Bike IS-A Vehicle safely</span>
+<span class="kw">class</span> Bike : Vehicle {};  <span class="cm">// no fake methods!</span>
+<span class="cm">// Spot validates compatibility</span>
+<span class="kw">bool</span> <span class="fn">canFitVehicle</span>(Vehicle* v) {
+  <span class="kw">return</span> v->type == BIKE || v->type == CAR;
+}</pre>
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        Vehicle_Parking.cpp — LSP Applied Correctly
+      </div>
+      <pre><span class="cm">// ✅ Vehicle class has ONLY what's common to ALL vehicles</span>
+<span class="hl-green-line"><span class="kw">class</span> <span class="cn">Vehicle</span> {</span>
+<span class="hl-green-line"><span class="kw">public</span>:</span>
+<span class="hl-green-line">    string licensePlate;    <span class="cm">// all vehicles have this</span></span>
+<span class="hl-green-line">    <span class="cn">VehicleType</span> type;       <span class="cm">// all vehicles have this</span></span>
+<span class="hl-green-line">    <span class="cm">// NO turnOnAC(), NO playMusic() — bike would break LSP!</span></span>
+<span class="hl-green-line">};</span>
+
+<span class="cm">// ✅ Car is-a Vehicle — no surprises, no fake methods</span>
+<span class="hl-green-line"><span class="kw">class</span> <span class="cn">Car</span> : <span class="kw">public</span> <span class="cn">Vehicle</span> {</span>
+<span class="hl-green-line"><span class="kw">public</span>:</span>
+<span class="hl-green-line">    <span class="cn">Car</span>(string plate) : <span class="cn">Vehicle</span>(plate, <span class="nm">VehicleType::CAR</span>) {}</span>
+<span class="hl-green-line">    <span class="cm">// Car can add extra things (like turnOnAC) in its OWN class</span></span>
+<span class="hl-green-line">};</span>
+
+<span class="cm">// ✅ Bike is-a Vehicle — substitutable anywhere Vehicle* is used</span>
+<span class="hl-green-line"><span class="kw">class</span> <span class="cn">Bike</span> : <span class="kw">public</span> <span class="cn">Vehicle</span> {</span>
+<span class="hl-green-line"><span class="kw">public</span>:</span>
+<span class="hl-green-line">    <span class="cn">Bike</span>(string plate) : <span class="cn">Vehicle</span>(plate, <span class="nm">VehicleType::BIKE</span>) {}</span>
+<span class="hl-green-line">};</span>
+
+<span class="cm">// Anywhere Vehicle* is used, Car* or Bike* works perfectly</span>
+<span class="cn">Vehicle</span>* v = <span class="kw">new</span> <span class="cn">Car</span>(<span class="st">"GJ-01-XX-9999"</span>);
+myLot.<span class="fn">parkVehicle</span>(v); <span class="cm">// works! No crash, no surprise</span>
+
+v = <span class="kw">new</span> <span class="cn">Bike</span>(<span class="st">"MH-02-YY-1111"</span>);
+myLot.<span class="fn">parkVehicle</span>(v); <span class="cm">// works! Bike substitutes Vehicle</span></pre>
+    </div>
+
+    <div class="def-box orange">
+      <div class="label">💡 Quick Rule</div>
+      <p><strong>"Can I replace the parent with a child without the program breaking or behaving unexpectedly?"</strong> If a child class throws exceptions the parent doesn't, or refuses to do what the parent promised — LSP is broken.</p>
+    </div>
+  </section>
+
+  <hr class="div" />
+
+  <!-- ════════════════════════ ISP ════════════════════════ -->
+  <section id="isp" class="principle-section isp">
+    <div class="principle-header">
+      <div class="principle-badge">I</div>
+      <div class="principle-title">
+        <div class="principle-number">Principle 4 of 5</div>
+        <h2>Interface Segregation Principle</h2>
+        <div class="subtitle">No class should be forced to implement methods it <strong>doesn't use</strong></div>
+      </div>
+    </div>
+
+    <div class="def-box purple">
+      <div class="label">📖 Definition</div>
+      <p>Instead of one <strong>fat, bloated interface</strong> with many methods, split it into <strong>smaller, focused interfaces</strong>. A class should only implement the methods it actually needs — not be forced to implement useless ones.</p>
+    </div>
+
+    <div class="def-box green" style="border-left-color:var(--ocp)">
+      <div class="label" style="color:var(--ocp)">🍽️ Real-Life Analogy</div>
+      <p>Imagine a <strong>restaurant menu</strong> with everything: pizza, sushi, burgers, cocktails, desserts. A customer who's vegetarian doesn't need the meat section. ISP says: have a <strong>Veg Menu, Drinks Menu, Dessert Menu</strong> separately. Don't force a vegetarian to scroll through meat items!</p>
+    </div>
+
+    <div class="vs-grid">
+      <div class="vs-box bad">
+        <div class="vs-label">❌ Violation — Bloated Interface</div>
+        <pre style="background:transparent;padding:0;font-size:11.5px;color:var(--muted);margin-top:8px;"><span class="kw">class</span> PaymentInterface {
+  <span class="kw">virtual void</span> <span class="fn">calculateFee</span>() = 0;
+  <span class="kw">virtual void</span> <span class="fn">pay</span>() = 0;
+  <span class="kw">virtual void</span> <span class="fn">issueCreditRefund</span>() = 0; <span class="cm">// ???</span>
+  <span class="kw">virtual void</span> <span class="fn">applyCrypto</span>() = 0;       <span class="cm">// ???</span>
+};
+<span class="kw">class</span> CashPayment : PaymentInterface {
+  <span class="kw">void</span> <span class="fn">issueCreditRefund</span>() {
+    <span class="fn">throw</span>(<span class="st">"Cash can't refund!"</span>); <span class="cm">// ❌</span>
+  }
+};</span></pre>
+      </div>
+      <div class="vs-box good">
+        <div class="vs-label">✅ Fix — Small, Focused Interfaces</div>
+        <pre style="background:transparent;padding:0;font-size:11.5px;color:var(--muted);margin-top:8px;"><span class="kw">class</span> IFeeCalculator {
+  <span class="kw">virtual double</span> <span class="fn">calculateFee</span>() = 0;
+};
+<span class="kw">class</span> IPayable {
+  <span class="kw">virtual void</span> <span class="fn">pay</span>(double amount) = 0;
+};
+<span class="cm">// CashPayment only needs these two</span>
+<span class="kw">class</span> CashPayment
+  : IFeeCalculator, IPayable {
+  <span class="cm">// implements only what it needs!</span>
+};</span></pre>
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        Vehicle_Parking.cpp — ISP: Clean PaymentStrategy Interface
+      </div>
+      <pre><span class="cm">// ✅ PaymentStrategy interface is focused — only 2 methods</span>
+<span class="hl-green-line"><span class="kw">class</span> <span class="cn">PaymentStrategy</span> {</span>
+<span class="hl-green-line"><span class="kw">public</span>:</span>
+<span class="hl-green-line">    <span class="kw">virtual</span> <span class="kw">double</span> <span class="fn">calculateFee</span>(<span class="cn">Ticket</span>* t) = <span class="nm">0</span>;</span>
+<span class="hl-green-line">    <span class="kw">virtual</span> <span class="kw">void</span>   <span class="fn">pay</span>(<span class="kw">double</span> amount) = <span class="nm">0</span>;</span>
+<span class="hl-green-line">    <span class="cm">// No issueCreditRefund() here — that would be ISP violation!</span></span>
+<span class="hl-green-line">};</span>
+
+<span class="cm">// CashPayment only implements what it actually can do</span>
+<span class="hl-green-line"><span class="kw">class</span> <span class="cn">CashPayment</span> : <span class="kw">public</span> <span class="cn">PaymentStrategy</span> {</span>
+<span class="hl-green-line"><span class="kw">public</span>:</span>
+<span class="hl-green-line">    <span class="kw">double</span> <span class="fn">calculateFee</span>(<span class="cn">Ticket</span>* t) <span class="kw">override</span> { <span class="kw">return</span> <span class="nm">10.0</span>; }</span>
+<span class="hl-green-line">    <span class="kw">void</span>   <span class="fn">pay</span>(<span class="kw">double</span> amount)       <span class="kw">override</span> { cout &lt;&lt; <span class="st">"Cash: $"</span> &lt;&lt; amount; }</span>
+<span class="hl-green-line">    <span class="cm">// No fake issueCreditRefund() that throws an exception!</span></span>
+<span class="hl-green-line">};</span>
+
+<span class="cm">// Google Docs example — DocumentElement is focused</span>
+<span class="hl-green-line"><span class="kw">class</span> <span class="cn">DocumentElement</span> {</span>
+<span class="hl-green-line">    <span class="kw">virtual</span> string <span class="fn">render</span>() = <span class="nm">0</span>;  <span class="cm">// ONE method — ISP satisfied</span></span>
+<span class="hl-green-line">};</span></pre>
+    </div>
+
+    <div class="def-box purple">
+      <div class="label">💡 Quick Rule</div>
+      <p><strong>"Is any class implementing a method it doesn't use, or leaving it blank/throwing?"</strong> If yes → split that interface into smaller pieces. Clients should only depend on methods they actually call.</p>
+    </div>
+  </section>
+
+  <hr class="div" />
+
+  <!-- ════════════════════════ DIP ════════════════════════ -->
+  <section id="dip" class="principle-section dip">
+    <div class="principle-header">
+      <div class="principle-badge">D</div>
+      <div class="principle-title">
+        <div class="principle-number">Principle 5 of 5</div>
+        <h2>Dependency Inversion Principle</h2>
+        <div class="subtitle">Depend on <strong>abstractions</strong>, not on <strong>concrete implementations</strong></div>
+      </div>
+    </div>
+
+    <div class="def-box pink">
+      <div class="label">📖 Definition</div>
+      <p>High-level modules (like <code>ParkingLot</code>) should <strong>not depend directly</strong> on low-level modules (like <code>CashPayment</code>). Both should depend on an <strong>abstraction</strong> (interface). This is called "inverting" the dependency.</p>
+    </div>
+
+    <div class="def-box blue" style="border-left-color:var(--srp)">
+      <div class="label" style="color:var(--srp)">🔌 Real-Life Analogy</div>
+      <p>Your laptop has a <strong>USB port</strong> (abstraction). You can plug in any USB device — keyboard, mouse, speaker, flash drive (concrete implementations). The laptop doesn't know or care which specific device is plugged in. This is DIP! If the laptop had a <strong>built-in Sony keyboard</strong> (hardcoded), it can't be replaced = DIP violation.</p>
+    </div>
+
+    <div class="vs-grid">
+      <div class="vs-box bad">
+        <div class="vs-label">❌ Violation — Hardcoded dependency</div>
+        <pre style="background:transparent;padding:0;font-size:11.5px;color:var(--muted);margin-top:8px;"><span class="kw">class</span> ParkingLot {
+  <span class="kw">private</span>:
+    <span class="cm">// ❌ Directly uses concrete class!</span>
+    CashPayment payment;     <span class="cm">// hardcoded</span>
+    FirstAvailable alloc;   <span class="cm">// hardcoded</span>
+
+  ParkingLot() {
+    payment = <span class="kw">new</span> CashPayment(); <span class="cm">// ❌</span>
+    alloc = <span class="kw">new</span> FirstAvailable(); <span class="cm">// ❌</span>
+  }
+};</span>
+<span style="color:#f76b8a;font-size:12px;">Want UPI payment? Must EDIT ParkingLot!</span></pre>
+      </div>
+      <div class="vs-box good">
+        <div class="vs-label">✅ Fix — Inject abstractions</div>
+        <pre style="background:transparent;padding:0;font-size:11.5px;color:var(--muted);margin-top:8px;"><span class="kw">class</span> ParkingLot {
+  <span class="kw">private</span>:
+    <span class="cm">// ✅ Depends on interfaces!</span>
+    SpotAllocationStrategy* alloc;
+    PaymentStrategy* payment;
+
+  ParkingLot(
+    SpotAllocationStrategy* a,
+    PaymentStrategy* p) { <span class="cm">// injected!</span>
+    alloc   = a;
+    payment = p;
+  }
+};</span>
+<span style="color:#3ecf8e;font-size:12px;">Swap UPI in without editing ParkingLot!</span></pre>
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        Vehicle_Parking.cpp — DIP: Constructor Injection
+      </div>
+      <pre><span class="cm">// ✅ ParkingLot depends on ABSTRACTIONS (interfaces), not concrete classes</span>
+<span class="hl-green-line"><span class="kw">class</span> <span class="cn">ParkingLot</span> {</span>
+<span class="hl-green-line">    vector&lt;<span class="cn">ParkingSpot</span>*&gt; spots;           <span class="cm">// abstraction</span></span>
+<span class="hl-green-line">    <span class="cn">SpotAllocationStrategy</span>* allocation;  <span class="cm">// interface, not FirstAvailableSpot*</span></span>
+<span class="hl-green-line">    <span class="cn">PaymentStrategy</span>* payment;            <span class="cm">// interface, not CashPayment*</span></span>
+<span class="hl-green-line"></span>
+<span class="hl-green-line"><span class="kw">public</span>:</span>
+<span class="hl-green-line">    <span class="cm">// Injected from outside! ParkingLot doesn't create them.</span></span>
+<span class="hl-green-line">    <span class="cn">ParkingLot</span>(vector&lt;<span class="cn">ParkingSpot</span>*&gt; s,</span>
+<span class="hl-green-line">               <span class="cn">SpotAllocationStrategy</span>* alloc,</span>
+<span class="hl-green-line">               <span class="cn">PaymentStrategy</span>* pay) {</span>
+<span class="hl-green-line">        spots = s; allocation = alloc; payment = pay;</span>
+<span class="hl-green-line">    }</span>
+<span class="hl-green-line">};</span>
+
+<span class="cm">// In main() — you decide WHICH concrete class to inject</span>
+<span class="cn">SpotAllocationStrategy</span>* allocator = <span class="kw">new</span> <span class="cn">FirstAvailableSpot</span>();
+<span class="cn">PaymentStrategy</span>* payment = <span class="kw">new</span> <span class="cn">CashPayment</span>();
+<span class="cn">ParkingLot</span> myLot(spots, allocator, payment);
+
+<span class="cm">// Tomorrow: switch to UPI — zero changes to ParkingLot!</span>
+<span class="hl-green-line"><span class="cn">PaymentStrategy</span>* payment = <span class="kw">new</span> <span class="cn">UPIPayment</span>();   <span class="cm">// just change here</span></span>
+<span class="hl-green-line"><span class="cn">ParkingLot</span> myLot(spots, allocator, payment);    <span class="cm">// ParkingLot unchanged!</span></span></pre>
+    </div>
+
+    <!-- Google Docs DIP -->
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        Google_Docs.cpp — DIP: DocumentEditor depends on Persistence interface
+      </div>
+      <pre><span class="cm">// ✅ DocumentEditor depends on Persistence INTERFACE — not FileStorage directly</span>
+<span class="hl-green-line"><span class="kw">class</span> <span class="cn">DocumentEditor</span> {</span>
+<span class="hl-green-line">    <span class="cn">Document</span>*    document;  <span class="cm">// abstraction</span></span>
+<span class="hl-green-line">    <span class="cn">Persistence</span>* storage;   <span class="cm">// interface, not FileStorage!</span></span>
+<span class="hl-green-line"></span>
+<span class="hl-green-line"><span class="kw">public</span>:</span>
+<span class="hl-green-line">    <span class="cn">DocumentEditor</span>(<span class="cn">Document</span>* doc, <span class="cn">Persistence</span>* store) {</span>
+<span class="hl-green-line">        document = doc;  storage = store;  <span class="cm">// injected!</span></span>
+<span class="hl-green-line">    }</span>
+<span class="hl-green-line">};</span>
+
+<span class="cm">// In main() — decide storage type</span>
+<span class="cn">Persistence</span>* persistence = <span class="kw">new</span> <span class="cn">FileStorage</span>();    <span class="cm">// or DBStorage()</span>
+<span class="cn">DocumentEditor</span>* editor = <span class="kw">new</span> <span class="cn">DocumentEditor</span>(doc, persistence);
+<span class="cm">// Switch to DB: new DBStorage() — DocumentEditor is untouched!</span></pre>
+    </div>
+
+    <div class="def-box pink">
+      <div class="label">💡 Quick Rule</div>
+      <p><strong>"Does my high-level class use <code>new ConcreteClass()</code> inside it?"</strong> If yes → DIP violation. Move that <code>new</code> to the outside (constructor injection, factory, or DI container) and have the class depend on an interface instead.</p>
+    </div>
+  </section>
+
+  <hr class="div" />
+
+  <!-- ════════════════════════ SUMMARY ════════════════════════ -->
+  <section id="summary" class="principle-section">
+    <div class="section-header" style="margin-bottom:28px;">
+      <h2 style="font-family:'Outfit',sans-serif;font-size:1.8rem;font-weight:800;">⚡ SOLID at a Glance</h2>
+      <p style="color:var(--muted);margin-top:6px;">Everything you need to remember — one final reference</p>
+    </div>
+
+    <!-- SUMMARY BAR -->
+    <div class="summary-bar">
+      <div class="sb-item">
+        <div class="sb-acr" style="color:var(--srp)">S</div>
+        <div class="sb-name">Single Responsibility</div>
+        <div class="sb-desc">One class = one job = one reason to change</div>
+      </div>
+      <div class="sb-item">
+        <div class="sb-acr" style="color:var(--ocp)">O</div>
+        <div class="sb-name">Open / Closed</div>
+        <div class="sb-desc">Add new behavior via new classes, not editing old ones</div>
+      </div>
+      <div class="sb-item">
+        <div class="sb-acr" style="color:var(--lsp)">L</div>
+        <div class="sb-name">Liskov Substitution</div>
+        <div class="sb-desc">Child must safely replace parent — no surprises</div>
+      </div>
+      <div class="sb-item">
+        <div class="sb-acr" style="color:var(--isp)">I</div>
+        <div class="sb-name">Interface Segregation</div>
+        <div class="sb-desc">Small focused interfaces, not one fat interface</div>
+      </div>
+      <div class="sb-item">
+        <div class="sb-acr" style="color:var(--dip)">D</div>
+        <div class="sb-name">Dependency Inversion</div>
+        <div class="sb-desc">Depend on interfaces (abstractions), not concrete classes</div>
+      </div>
+    </div>
+
+    <!-- FULL COMPARISON TABLE -->
+    <table class="cmp-table">
+      <thead>
+        <tr>
+          <th>Principle</th>
+          <th>Symptom Without It</th>
+          <th>Fix in Parking Lot Design</th>
+          <th>Key Keyword</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong style="color:var(--srp)">SRP</strong></td>
+          <td>God class: Ticket calculates fee + saves to DB + formats PDF</td>
+          <td>Split: Ticket (data), PaymentStrategy (fee), ParkingLot (orchestration)</td>
+          <td><code class="sym">one reason to change</code></td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--ocp)">OCP</strong></td>
+          <td>if-else in ParkingSpot; adding ElectricSpot = editing core class</td>
+          <td>Abstract <code>ParkingSpot</code> + concrete subclasses (CompactSpot, LargeSpot…)</td>
+          <td><code class="sym">extend, don't modify</code></td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--lsp)">LSP</strong></td>
+          <td>Bike subclass throws on <code>turnOnAC()</code> call — crash!</td>
+          <td>Vehicle has only common attributes; spot validates with <code>canFitVehicle()</code></td>
+          <td><code class="sym">substitutable child</code></td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--isp)">ISP</strong></td>
+          <td>One PaymentInterface forces CashPayment to implement <code>issueCreditRefund()</code></td>
+          <td>PaymentStrategy has only 2 methods: <code>calculateFee</code> + <code>pay</code></td>
+          <td><code class="sym">small interfaces</code></td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--dip)">DIP</strong></td>
+          <td>ParkingLot hardcodes <code>new CashPayment()</code> inside itself</td>
+          <td>Strategies injected via constructor; ParkingLot depends on abstractions</td>
+          <td><code class="sym">depend on interfaces</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- LSP SUB-RULES RECAP -->
+    <div style="background:var(--bg2);border:1px solid rgba(247,147,79,.25);border-radius:var(--radius);padding:28px;margin:24px 0;">
+      <h3 style="font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:700;color:var(--lsp);margin-bottom:18px;">📓 LSP Sub-Rules — From Your Notebook</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;">
+        <div>
+          <p style="font-size:13px;font-weight:700;color:var(--lsp);margin-bottom:8px;">📝 Signature Rule</p>
+          <ul class="nl">
+            <li><strong>Method Assignment</strong> — Parameters: same or broader</li>
+            <li><strong>Return Type</strong> — Return: same or more specific</li>
+            <li><strong>Exception</strong> — Same or fewer exceptions thrown</li>
+          </ul>
+        </div>
+        <div>
+          <p style="font-size:13px;font-weight:700;color:var(--lsp);margin-bottom:8px;">🏗️ Property Rule</p>
+          <ul class="nl">
+            <li><strong>Class Invariant</strong> — Parent's always-true conditions still hold in child</li>
+            <li><strong>History Constraint</strong> — Child can't allow state changes parent forbids</li>
+          </ul>
+        </div>
+        <div>
+          <p style="font-size:13px;font-weight:700;color:var(--lsp);margin-bottom:8px;">⚙️ Method Rule</p>
+          <ul class="nl">
+            <li><strong>Pre-condition</strong> — Child's input requirement: weaker or same</li>
+            <li><strong>Post-condition</strong> — Child's output guarantee: stronger or same</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEMORY TRICK -->
+    <div class="def-box blue">
+      <div class="label">🧠 Memory Trick — The Restaurant Story</div>
+      <p>
+        <strong style="color:var(--srp)">S</strong> — The <strong>chef</strong> only cooks (not serves, not bills).<br>
+        <strong style="color:var(--ocp)">O</strong> — Adding a new dish? Put it on the <strong>new menu page</strong>, don't rewrite the whole menu.<br>
+        <strong style="color:var(--lsp)">L</strong> — Any <strong>waiter</strong> can replace another waiter without confusion — all waiters do the same job.<br>
+        <strong style="color:var(--isp)">I</strong> — A <strong>veg menu</strong> doesn't include meat sections — only what that customer needs.<br>
+        <strong style="color:var(--dip)">D</strong> — The restaurant uses a <strong>standard gas line</strong> (interface) — can connect any gas brand, not one specific company.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>📐 <span>SOLID Principles Notes</span> · LLD Learning Series · Built with your code from Vehicle_Parking.cpp &amp; Google_Docs.cpp</p>
+</footer>
+
+<script>
+  // Active nav on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks  = document.querySelectorAll('.nav a');
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        const a = document.querySelector(`.nav a[href="#${e.target.id}"]`);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-35% 0px -60% 0px' });
+  sections.forEach(s => io.observe(s));
+
+  // Smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const t = document.querySelector(a.getAttribute('href'));
+      if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // Scroll-reveal for cards
+  const reveals = document.querySelectorAll('.vs-box, .lsp-rule, .info-item, .sb-item');
+  const ro = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.08 });
+  reveals.forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(16px)';
+    el.style.transition = 'opacity .4s ease, transform .4s ease';
+    ro.observe(el);
+  });
+</script>
+</body>
+</html>
