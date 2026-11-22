@@ -1,0 +1,61 @@
+----- The Problem It Solves -----
+
+-> Imagine you are building a payment application.
+-> Your application supports three payment methods: Credit Card, UPI, PayPal.
+-> Without Strategy Pattern, you might write using if-else condition.
+-> but imagine your application supports 20 payment methods or add new methods.
+-> For this need to add more if-else condition.
+
+-> Instead of keeping all payment algorithms in one function, we separate each payment method into its own strategy.
+
+
+
+
+
+----- Real-life Example -----
+
+1. Payment System
+2. Notification System
+3. Choosing a Travel Route
+4. Discount Systems
+5. Compression Algorithms
+
+
+
+----- How does Strategy Pattern work? -----
+
+             Context
+                ↓
+        Strategy Interface
+                ↓
+Strategy A   Strategy B   Strategy C  ...
+
+
+
+
+
+----- Payment System -----
+
+UPI Payment,
+Credit Card Payment,
+PayPal Payment
+
+client -> PaymentContext -> PaymentStrategy (Abstract Class)
+
+
+.h -> Header file: declares classes and functions
+.cpp -> Source file: implements functions
+
+
+PaymentStrategy.h       ->  defines the common payment interface.
+PaymentStrategies.h     ->  declares different payment classes.
+PaymentStrategies.cpp   ->  implements their payment logic.
+
+
+PaymentContext.h 
+- The customer should not need to know how UPI, Credit Card, or PayPal works internally.
+- The customer only selects a payment method.
+- The Context handles the selected strategy.
+
+
+unique_ptr is a smart pointer in C++ that manages the lifetime of a dynamically allocated object.
