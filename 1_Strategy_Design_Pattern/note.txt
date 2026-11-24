@@ -34,6 +34,16 @@ Strategy A   Strategy B   Strategy C  ...
 
 
 
+----- Three important smart pointers in C++ -----
+
+unique_ptr  -   One owner   -   When one object controls the lifetime
+shared_ptr  -   Multiple    -   owners	When multiple parts of a program share ownership
+weak_ptr    -   Non-owning  -   reference to shared object	To observe a shared_ptr object without extending its lifetime
+
+
+
+
+
 ----- Payment System -----
 
 UPI Payment,
@@ -66,3 +76,10 @@ void setStrategy(unique_ptr<PaymentStrategy> newStrategy);
 paymentContext.setStrategy(
     make_unique<UPIPayment>()
 );
+
+
+
+----- Notification System -----
+
+If only use Strategy Pattern in main file we need to add switch case it's similar to if-else only not need condition when send notification.
+If tomorrow we add 50 notification methods, should we continue adding 50 cases to the switch statement, or should we improve the design using a Factory Pattern?

@@ -18,4 +18,9 @@ public:
     void send(const string& message) const override;
 };
 
+class TelegramStrategy : public NotificationStrategy {
+public:
+    void send(const string& message) const override;
+};
+
 #endif

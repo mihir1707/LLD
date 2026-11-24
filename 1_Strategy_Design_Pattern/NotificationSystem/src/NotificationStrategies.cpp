@@ -9,14 +9,20 @@ void EmailStrategy::send(const string& message) const {
     cout << "Email Notification Sent Successfully!\n";
 }
 
-void SMSStrategy::send(const string &message) const {
+void SMSStrategy::send(const string& message) const {
     cout << "\nSending SMS Notification...\n";
     cout << "SMS Message: " << message << endl;
     cout << "SMS Notification Sent Successfully!\n";
 }
 
-void WhatsAppStrategy::send(const string &message) const {
+void WhatsAppStrategy::send(const string& message) const {
     cout << "\nSending WhatsApp Notification...\n";
     cout << "WhatsApp Message: " << message << endl;
     cout << "WhatsApp Notification Sent Successfully!\n";
+}
+
+void TelegramStrategy::send(const string& message) const {
+    cout << "\nSending Telegram Notification...\n";
+    cout << "Telegram Message: " << message << endl;
+    cout << "Telegram Notification Sent Successfully!\n";
 }

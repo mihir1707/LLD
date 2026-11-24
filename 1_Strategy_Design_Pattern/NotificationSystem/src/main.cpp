@@ -19,6 +19,8 @@ int main(){
     cout << "1. Email Notification\n";
     cout << "2. SMS Notification\n";
     cout << "3. WhatsApp Notification\n";
+    cout << "3. Telegram Notification\n";
+
 
     cout << "\nEnter your choice: ";
 
@@ -42,6 +44,9 @@ int main(){
         case 3:
             notificationContext.setStrategy(make_unique<WhatsAppStrategy>());
             break;
+
+        case 4:
+            notificationContext.setStrategy(make_unique<TelegramStrategy>());
 
         default:
             cout << "Invalid notification choice!\n";
