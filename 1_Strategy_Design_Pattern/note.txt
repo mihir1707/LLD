@@ -59,3 +59,10 @@ PaymentContext.h
 
 
 unique_ptr is a smart pointer in C++ that manages the lifetime of a dynamically allocated object.
+
+
+----- Liskov Substitution -----
+void setStrategy(unique_ptr<PaymentStrategy> newStrategy);
+paymentContext.setStrategy(
+    make_unique<UPIPayment>()
+);
